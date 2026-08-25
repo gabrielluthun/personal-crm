@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-job-search"
+description = "Allow job search via Rust (Bright Data token stays in keychain)"
+commands.allow = ["search_jobs"]
