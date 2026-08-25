@@ -9,7 +9,7 @@ export default function EntreprisePage() {
         title="Entreprise"
         description="Suivi des entreprises ciblées pour la prospection."
       />
-      <div className="px-6 py-8 text-sm text-muted-foreground">
+      <div className="px-4 py-6 text-fluid-body text-muted-foreground sm:px-6 md:px-8">
         Contenu à venir — table des entreprises et fiche d'édition.
       </div>
     </div>
