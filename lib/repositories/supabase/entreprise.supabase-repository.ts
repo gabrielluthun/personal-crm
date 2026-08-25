@@ -23,6 +23,7 @@ import {
   getSupabaseClient,
   type AppSupabaseClient,
 } from "@/lib/supabase/client";
+import { containsPattern } from "@/lib/supabase/filters";
 import {
   mapEntrepriseRow,
   mapEntrepriseToInsert,
@@ -39,7 +40,7 @@ export class SupabaseEntrepriseRepository implements EntreprisePort {
       .from("entreprises")
       .select("*", { count: "exact" });
     if (query.search?.trim()) {
-      builder = builder.ilike("name", `%${query.search.trim()}%`);
+      builder = builder.ilike("name", containsPattern(query.search.trim()));
     }
     const sort = query.sort ?? { field: "name", direction: "asc" };
     const column =

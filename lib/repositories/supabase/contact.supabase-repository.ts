@@ -24,6 +24,7 @@ import {
   getSupabaseClient,
   type AppSupabaseClient,
 } from "@/lib/supabase/client";
+import { containsFilterValue } from "@/lib/supabase/filters";
 import { mapContactRow, mapContactToInsert } from "@/lib/supabase/mappers";
 
 export class SupabaseContactRepository implements ContactPort {
@@ -35,7 +36,7 @@ export class SupabaseContactRepository implements ContactPort {
     const to = from + pageSize - 1;
     let builder = this.client.from("contacts").select("*", { count: "exact" });
     if (query.search?.trim()) {
-      const term = `%${query.search.trim()}%`;
+      const term = containsFilterValue(query.search.trim());
       builder = builder.or(
         `first_name.ilike.${term},last_name.ilike.${term},email.ilike.${term}`,
       );

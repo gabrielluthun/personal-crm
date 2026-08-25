@@ -29,15 +29,15 @@ export function BrightDataSettingsCard({
       <CardHeader>
         <CardTitle>Bright Data</CardTitle>
         <CardDescription>
-          Jeton utilisé pour la collecte d&apos;offres. Il ne traverse jamais le
-          frontend en production (commande Tauri Rust à l&apos;étape suivante).
+          Jeton utilisé pour la collecte d&apos;offres. Il est lu côté Rust au
+          moment de la recherche et ne revient jamais vers le frontend.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <SecretInput
           id="bright-data-token"
           label="Jeton API"
-          description="Stockage mock en mémoire pour l'instant — keychain OS ensuite."
+          description="Stocké dans le trousseau du système. Jamais réaffiché."
           configured={settings.secretPresence.bright_data_token === true}
           disabled={settings.isLoading}
           isSaving={isSaving}

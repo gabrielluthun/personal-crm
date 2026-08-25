@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { MoonIcon, SunIcon, MonitorIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -15,12 +14,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function ThemeToggle() {
+  // next-themes leaves `theme` undefined until it has read the stored
+  // preference, so the fallback below already covers the pre-hydration render.
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <DropdownMenu>
@@ -39,7 +35,7 @@ export function ThemeToggle() {
       <DropdownMenuContent align="end" className="min-w-40">
         <DropdownMenuLabel>Apparence</DropdownMenuLabel>
         <DropdownMenuRadioGroup
-          value={mounted ? (theme ?? "system") : "system"}
+          value={theme ?? "system"}
           onValueChange={setTheme}
         >
           <DropdownMenuRadioItem value="light">

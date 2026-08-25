@@ -10,6 +10,8 @@ type SidebarNavLinkProps = {
   readonly item: NavItem;
   /** When true, always show the label (e.g. mobile drawer). */
   readonly forceExpanded?: boolean;
+  /** Called when the link is activated, so a drawer can close itself. */
+  readonly onNavigate?: () => void;
 };
 
 function normalizePath(path: string): string {
@@ -22,6 +24,7 @@ function normalizePath(path: string): string {
 export function SidebarNavLink({
   item,
   forceExpanded = false,
+  onNavigate,
 }: SidebarNavLinkProps) {
   const pathname = usePathname();
   const current = normalizePath(pathname);
@@ -35,6 +38,7 @@ export function SidebarNavLink({
       aria-label={item.label}
       aria-current={isActive ? "page" : undefined}
       title={forceExpanded ? undefined : item.label}
+      onClick={onNavigate}
       className={cn(
         "flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium transition-colors",
         // Explicit clamp+vw so sidebar type scales with the window (max 16px).
