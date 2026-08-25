@@ -2,6 +2,7 @@
 
 import { ExternalLinkIcon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { openExternal } from "@/lib/tauri/open-external";
@@ -31,6 +32,10 @@ export function ExternalLinkCell({
     setIsOpening(true);
     try {
       await openExternal(url);
+    } catch {
+      // A URL outside the opener capability scope is rejected by Rust; without
+      // this the rejection would be swallowed and the click look like a no-op.
+      toast.error("Impossible d'ouvrir ce lien");
     } finally {
       setIsOpening(false);
     }
