@@ -49,7 +49,7 @@ Commandes exposées au frontend :
 - `delete_secret` — efface
 
 Aucune commande `get_secret`. Allowlist de clés dans `secrets.rs`
-(`bright_data_token`, `supabase_anon_key`).
+(`bright_data_token` uniquement).
 
 ## Capacités Tauri
 
@@ -101,6 +101,7 @@ barre d'adresse. Utiliser `lib/tauri/open-external.ts` (plugin opener).
 | XSS → exfiltration | CSP stricte, pas de HTML non contrôlé |
 | Fuite via logs | Les commandes ne loggent pas les valeurs |
 | Confusion mock / prod | `NEXT_PUBLIC_DATA_SOURCE` opt-in explicite |
+| Jeton Bright Data invalide | `test_bright_data_connection` (probe HTTP, sans renvoyer le jeton) |
 
 ## Checklist avant release
 
