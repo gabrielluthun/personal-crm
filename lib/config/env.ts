@@ -13,8 +13,7 @@ export type SupabasePublicEnv = {
   readonly supabaseAnonKey: string;
 };
 
-function readOptional(name: string): string | null {
-  const value = process.env[name];
+function readOptional(value: string | undefined): string | null {
   if (typeof value !== "string") {
     return null;
   }
@@ -22,10 +21,15 @@ function readOptional(name: string): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+/**
+ * Each variable must be read as a literal `process.env.NAME` member access:
+ * Next.js only substitutes those at build time. `process.env[name]` survives
+ * the build and resolves to an empty shim in the webview.
+ */
 export function getPublicEnv(): PublicEnv {
   return {
-    supabaseUrl: readOptional("NEXT_PUBLIC_SUPABASE_URL"),
-    supabaseAnonKey: readOptional("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+    supabaseUrl: readOptional(process.env.NEXT_PUBLIC_SUPABASE_URL),
+    supabaseAnonKey: readOptional(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
   };
 }
 
