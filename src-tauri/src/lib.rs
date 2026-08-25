@@ -1,3 +1,4 @@
+mod bright_data;
 mod error;
 mod job_search;
 mod models;
@@ -12,6 +13,7 @@ pub fn run() {
       secrets::has_secret,
       secrets::delete_secret,
       job_search::search_jobs,
+      bright_data::test_bright_data_connection,
     ])
     .setup(|app| {
       if cfg!(debug_assertions) {
