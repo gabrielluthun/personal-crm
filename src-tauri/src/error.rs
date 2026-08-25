@@ -14,6 +14,10 @@ pub enum AppError {
   BrightDataHttp(u16),
   #[error("Impossible de joindre Bright Data: {0}")]
   BrightDataNetwork(String),
+  #[error("Aucune zone SERP active — créez-en une dans le dashboard Bright Data")]
+  MissingSerpZone,
+  #[error("Réponse Bright Data illisible: {0}")]
+  BrightDataParse(String),
   #[error("Erreur keychain: {0}")]
   Keyring(String),
 }
