@@ -24,5 +24,12 @@ log = "0.4"
 tauri = { version = "2.11.3" }
 tauri-plugin-log = "2"
 tauri-plugin-opener = "2"
-keyring = "3"
+# Without a platform feature, keyring 3 silently falls back to an in-memory
+# mock store: secrets look saved but never persist and are never readable.
+keyring = { version = "3", features = [
+  "apple-native",
+  "windows-native",
+  "sync-secret-service",
+  "crypto-rust",
+] }
 thiserror = "2"
