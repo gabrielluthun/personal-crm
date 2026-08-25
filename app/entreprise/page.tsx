@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { EntrepriseEditSheet } from "@/components/entreprise/entreprise-edit-sheet";
 import { EntrepriseTable } from "@/components/entreprise/entreprise-table";
 import { EntrepriseToolbar } from "@/components/entreprise/entreprise-toolbar";
 import { PageHeader } from "@/components/layout/page-header";
@@ -18,10 +19,13 @@ export default function EntreprisePage() {
     setSearch,
     isLoading,
     error,
+    create,
+    update,
     removeMany,
   } = useEntreprises();
   const selection = useRowSelection<EntrepriseId>();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [activeEntreprise, setActiveEntreprise] = useState<Entreprise | null>(
     null,
   );
@@ -54,6 +58,7 @@ export default function EntreprisePage() {
       ids.some((id) => id === activeEntreprise.id)
     ) {
       setActiveEntreprise(null);
+      setSheetOpen(false);
     }
     selection.clear();
     toast.success(
@@ -65,16 +70,12 @@ export default function EntreprisePage() {
 
   function handleCreate(): void {
     setActiveEntreprise(null);
-    toast.message("Fiche d'édition à venir", {
-      description: "La création d'entreprise arrive à l'étape suivante.",
-    });
+    setSheetOpen(true);
   }
 
   function handleRowClick(entreprise: Entreprise): void {
     setActiveEntreprise(entreprise);
-    toast.message("Fiche d'édition à venir", {
-      description: `« ${entreprise.name} » s'ouvrira dans un panneau latéral.`,
-    });
+    setSheetOpen(true);
   }
 
   return (
@@ -111,6 +112,14 @@ export default function EntreprisePage() {
           {total} entreprise{total === 1 ? "" : "s"}
         </p>
       </div>
+
+      <EntrepriseEditSheet
+        open={sheetOpen}
+        entreprise={activeEntreprise}
+        onOpenChange={setSheetOpen}
+        onCreate={create}
+        onUpdate={update}
+      />
     </div>
   );
 }
