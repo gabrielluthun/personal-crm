@@ -5,7 +5,7 @@ export type TemplateId = Id<"Template">;
 
 /**
  * Icebreaker / message template.
- * Body may contain placeholders such as {{nom_entreprise}}.
+ * Body may contain placeholders such as {{company_name}}.
  */
 export type MessageTemplate = Timestamps & {
   readonly id: TemplateId;
