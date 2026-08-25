@@ -28,6 +28,8 @@ export function EntrepriseToolbar({
       onSearchChange={onSearchChange}
       searchPlaceholder="Rechercher une entreprise…"
       searchLabel="Rechercher une entreprise"
+      searchWrapperClassName="max-w-none flex-1"
+      className="gap-3 sm:items-center"
       actions={
         <>
           {selectedCount > 0 ? (
