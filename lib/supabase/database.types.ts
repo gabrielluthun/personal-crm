@@ -3,6 +3,38 @@
  * Replace with `supabase gen types` once the project is provisioned.
  */
 
+import type {
+  ContactInsert,
+  ContactRow,
+  ContactUpdate,
+  EntrepriseInsert,
+  EntrepriseRow,
+  EntrepriseUpdate,
+  InteractionInsert,
+  InteractionRow,
+  InteractionUpdate,
+  TemplateInsert,
+  TemplateRow,
+  TemplateUpdate,
+} from "@/lib/supabase/database.rows";
+
+export type { Json } from "@/lib/supabase/database.rows";
+
+export type {
+  ContactInsert,
+  ContactRow,
+  ContactUpdate,
+  EntrepriseInsert,
+  EntrepriseRow,
+  EntrepriseUpdate,
+  InteractionInsert,
+  InteractionRow,
+  InteractionUpdate,
+  TemplateInsert,
+  TemplateRow,
+  TemplateUpdate,
+} from "@/lib/supabase/database.rows";
+
 export type Database = {
   public: {
     Tables: {
@@ -32,6 +64,27 @@ export type Database = {
         Update: TemplateUpdate;
         Relationships: [];
       };
+      interactions: {
+        Row: InteractionRow;
+        Insert: InteractionInsert;
+        Update: InteractionUpdate;
+        Relationships: [
+          {
+            foreignKeyName: "interactions_contact_id_fkey";
+            columns: ["contact_id"];
+            isOneToOne: false;
+            referencedRelation: "contacts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "interactions_template_id_fkey";
+            columns: ["template_id"];
+            isOneToOne: false;
+            referencedRelation: "templates";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -49,75 +102,3 @@ export type Database = {
     CompositeTypes: Record<string, never>;
   };
 };
-
-export type EntrepriseRow = {
-  id: string;
-  name: string;
-  linkedin_url: string | null;
-  website_url: string | null;
-  wttj_url: string | null;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-export type EntrepriseInsert = {
-  id?: string;
-  name: string;
-  linkedin_url?: string | null;
-  website_url?: string | null;
-  wttj_url?: string | null;
-  notes?: string | null;
-  created_at?: string;
-  updated_at?: string;
-};
-
-export type EntrepriseUpdate = Partial<EntrepriseInsert>;
-
-export type ContactRow = {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string | null;
-  linkedin_url: string | null;
-  status: Database["public"]["Enums"]["contact_status"];
-  entreprise_id: string | null;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-export type ContactInsert = {
-  id?: string;
-  first_name: string;
-  last_name: string;
-  email?: string | null;
-  linkedin_url?: string | null;
-  status?: Database["public"]["Enums"]["contact_status"];
-  entreprise_id?: string | null;
-  notes?: string | null;
-  created_at?: string;
-  updated_at?: string;
-};
-
-export type ContactUpdate = Partial<ContactInsert>;
-
-export type TemplateRow = {
-  id: string;
-  title: string;
-  body: string;
-  description: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-export type TemplateInsert = {
-  id?: string;
-  title: string;
-  body: string;
-  description?: string | null;
-  created_at?: string;
-  updated_at?: string;
-};
-
-export type TemplateUpdate = Partial<TemplateInsert>;
