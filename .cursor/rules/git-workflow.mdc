@@ -1,0 +1,46 @@
+---
+description: Modèle de branches Git Flow et granularité des commits
+alwaysApply: true
+---
+
+# Workflow git
+
+## Branches
+
+- `main` est la production. On n'y committe et on n'y merge jamais directement.
+- `develop` est la branche d'intégration. Toute branche part de `develop` et y
+  revient.
+- Une unité de travail = une branche :
+  - `feat/<nom>` pour une fonctionnalité,
+  - `fix/<nom>` pour une correction,
+  - `chore/<nom>` pour de l'outillage ou de la configuration,
+  - `docs/<nom>` pour de la documentation seule.
+- Les noms de branche sont en anglais, en kebab-case.
+
+## Cycle de travail
+
+```bash
+git checkout develop
+git checkout -b feat/contact-table
+# ... travail, un commit par fichier ...
+git checkout develop
+git merge --no-ff feat/contact-table
+```
+
+Le merge se fait toujours en `--no-ff` pour conserver la trace de la branche
+dans le graphe.
+
+## Granularité
+
+- Un fichier modifié = un commit. On stage le chemin exact avec
+  `git add chemin/du/fichier`, puis on committe, puis on passe au suivant.
+- `git add .` et `git add -A` sont interdits.
+- Seule exception : les fichiers générés par un CLI tiers (composants
+  `components/ui/` de shadcn, icônes Tauri, lockfiles binaires) peuvent être
+  groupés dans un commit unique, explicitement signalé.
+
+## Interdits
+
+- Pas de `--amend` sur un commit déjà poussé.
+- Pas de `push --force` sur `main` ni `develop`.
+- Pas de modification de la configuration git du dépôt.
