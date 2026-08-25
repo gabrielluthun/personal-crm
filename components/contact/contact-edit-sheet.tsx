@@ -12,6 +12,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useContactChannels } from "@/hooks/use-contact-channels";
 import { useContactForm } from "@/hooks/use-contact-form";
 import type {
   Contact,
@@ -53,6 +54,7 @@ export function ContactEditSheet({
       onOpenChange(false);
     },
   });
+  const channels = useContactChannels(contact?.id ?? null);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -67,8 +69,8 @@ export function ContactEditSheet({
           </SheetTitle>
           <SheetDescription>
             {form.isEditing
-              ? "Modifiez les informations du contact."
-              : "Renseignez les informations du nouveau contact."}
+              ? "Statut, coordonnées, canaux et notes internes."
+              : "Renseignez le nouveau contact, puis enregistrez."}
           </SheetDescription>
         </SheetHeader>
 
@@ -76,6 +78,8 @@ export function ContactEditSheet({
           <ContactForm
             values={form.values}
             fieldErrors={form.fieldErrors}
+            channels={channels.channels}
+            channelsLoading={channels.isLoading}
             disabled={form.isSubmitting}
             onChange={form.setField}
           />
