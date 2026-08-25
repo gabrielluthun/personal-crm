@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import { AppShell } from "@/components/layout/app-shell";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -31,7 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-background text-foreground">
+      <body className="h-full overflow-hidden bg-background text-foreground">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -39,10 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           disableTransitionOnChange
         >
           <TooltipProvider>
-            <div className="fixed top-3 right-3 z-50">
-              <ThemeToggle />
-            </div>
-            {children}
+            <AppShell>{children}</AppShell>
             <Toaster richColors closeButton position="bottom-right" />
           </TooltipProvider>
         </ThemeProvider>
