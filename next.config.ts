@@ -1,7 +1,18 @@
 import type { NextConfig } from "next";
 
+const isProd = process.env.NODE_ENV === "production";
+const internalHost = process.env.TAURI_DEV_HOST || "localhost";
+
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: "export",
+  trailingSlash: true,
+  images: {
+    unoptimized: true,
+  },
+  // In Tauri, assets must resolve against the Vite/Next dev server in
+  // development. Production uses relative paths from the static export.
+  assetPrefix: isProd ? undefined : `http://${internalHost}:3000`,
+  reactStrictMode: true,
 };
 
 export default nextConfig;
