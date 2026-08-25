@@ -79,6 +79,16 @@ export function useContacts() {
     return result;
   }
 
+  async function removeMany(
+    ids: readonly ContactId[],
+  ): Promise<Result<void, DomainError>> {
+    const result = await contacts.deleteMany(ids);
+    if (result.ok) {
+      list.reload();
+    }
+    return result;
+  }
+
   return {
     items: list.data?.items ?? [],
     total: list.data?.total ?? 0,
@@ -95,6 +105,7 @@ export function useContacts() {
     create,
     update,
     remove,
+    removeMany,
     getById: (id: ContactId) => contacts.getById(id),
     listByEntreprise: (entrepriseId: EntrepriseId) =>
       contacts.listByEntreprise(entrepriseId),
