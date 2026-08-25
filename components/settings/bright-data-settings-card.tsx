@@ -69,8 +69,8 @@ export function BrightDataSettingsCard({
       <CardHeader>
         <CardTitle>Bright Data</CardTitle>
         <CardDescription>
-          Jeton utilisé pour la collecte d&apos;offres. Il est lu côté Rust au
-          moment de la recherche et ne revient jamais vers le frontend.
+          Jeton API Bright Data (keychain). La recherche dashboard utilise une
+          zone SERP active du compte. Le jeton ne revient jamais au frontend.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">

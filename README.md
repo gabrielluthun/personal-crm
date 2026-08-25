@@ -17,7 +17,9 @@ pnpm dev            # UI navigateur seulement (pas de keychain / Bright Data ré
 
 ## Config
 
-- **Bright Data** : jeton dans Settings → jeton API.
+- **Bright Data** : jeton API dans Settings (keychain). Recherche dashboard =
+  SERP réel en desktop (`pnpm tauri:dev`). Prérequis : une zone **SERP** active
+  sur le compte Bright Data. Navigateur (`pnpm dev`) = fixtures uniquement.
 - **Supabase** : uniquement via `.env.local`. 
 
 ```bash

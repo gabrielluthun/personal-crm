@@ -39,7 +39,7 @@ OS keychain (service com.personalcrm.app)
 read_secret_internal(key)         ← Rust uniquement, pas de commande Tauri
     │
     ▼
-search_jobs / futur client HTTP   ← résultat métier seulement vers le front
+search_jobs / client SERP HTTP   ← résultat métier seulement vers le front
 ```
 
 Commandes exposées au frontend :

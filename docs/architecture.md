@@ -101,7 +101,8 @@ Supabase → invalidation de la ressource async dans le hook de liste.
 ### Recherche d'offres (desktop)
 
 Formulaire Dashboard → `useJobSearch` → `JobSearchPort.search` → invoke
-`search_jobs` → Rust lit `bright_data_token` → filtre fixtures (MVP) → DTO
+`search_jobs` → Rust lit `bright_data_token` + zone SERP → Google SERP
+(WTTJ) → top 10 entreprises → enrichissement site + LinkedIn (SERP) → DTO
 camelCase → cartes UI. Le token ne traverse pas l'IPC.
 
 ### Import depuis une offre
@@ -122,7 +123,10 @@ Les mappers dans `lib/supabase/mappers.ts` convertissent les lignes.
 
 ## Limites connues
 
-- `search_jobs` : fixtures MVP jusqu'à l'HTTP Bright Data côté Rust.
+- `search_jobs` : pipeline SERP étapes 1–4 (offres WTTJ + enrichissement
+  entreprise). Pas encore de profils LinkedIn personnes (étapes 5–6).
+- Nécessite une **zone SERP active** sur le compte Bright Data (détectée via
+  `get_active_zones`).
 - `raw_data` / `scraped_at` prêts pour l'ingestion scrape, pas encore peuplés
   automatiquement.
 - Single-user : pas d'isolation multi-comptes (volontaire).

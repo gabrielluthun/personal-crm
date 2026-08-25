@@ -3,13 +3,17 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { ImportSelectionBar } from "@/components/dashboard/import-selection-bar";
-import { JobOfferList } from "@/components/dashboard/job-offer-list";
+import { CompanyPropositionList } from "@/components/dashboard/company-proposition-list";
 import { JobSearchForm } from "@/components/dashboard/job-search-form";
 import { PageHeader } from "@/components/layout/page-header";
 import { useEntreprises } from "@/hooks/use-entreprises";
 import { useJobSearch } from "@/hooks/use-job-search";
 import { useRowSelection } from "@/hooks/use-row-selection";
+import {
+  buildCompanyPropositions,
+  formatPropositionStatus,
+  formatRecruitmentContext,
+} from "@/lib/dashboard/company-propositions";
 import type { JobOfferId, JobSearchQuery } from "@/lib/domain/job-offer";
 
 export default function DashboardPage() {
@@ -17,6 +21,21 @@ export default function DashboardPage() {
   const { items: entreprises, create } = useEntreprises();
   const selection = useRowSelection<JobOfferId>();
   const [isImporting, setIsImporting] = useState(false);
+
+  const { propositions, stats } = buildCompanyPropositions(
+    jobSearch.offers,
+    entreprises,
+  );
+
+  const statusText =
+    jobSearch.hasSearched && !jobSearch.isLoading
+      ? formatPropositionStatus(stats)
+      : null;
+
+  const recruitmentContext = formatRecruitmentContext(
+    jobSearch.lastQuery?.keywords ?? "",
+    jobSearch.lastQuery?.location,
+  );
 
   async function handleSearch(query: JobSearchQuery): Promise<void> {
     selection.clear();
@@ -27,36 +46,25 @@ export default function DashboardPage() {
   }
 
   async function handleImport(): Promise<void> {
-    const selectedOffers = jobSearch.offers.filter((offer) =>
-      selection.isSelected(offer.id),
+    const selected = propositions.filter((item) =>
+      selection.isSelected(item.id),
     );
-    if (selectedOffers.length === 0) {
+    if (selected.length === 0) {
       return;
     }
 
     setIsImporting(true);
     let created = 0;
-    let skipped = 0;
 
-    for (const offer of selectedOffers) {
-      const alreadyExists = entreprises.some(
-        (entreprise) =>
-          entreprise.name.toLowerCase() === offer.companyName.toLowerCase(),
-      );
-      if (alreadyExists) {
-        skipped += 1;
-        continue;
-      }
-
+    for (const item of selected) {
       const result = await create({
-        name: offer.companyName,
-        websiteUrl: offer.companyWebsiteUrl,
-        linkedinUrl: offer.companyLinkedinUrl,
-        wttjUrl: offer.wttjUrl,
-        location: offer.location,
-        targetOfferUrl: offer.wttjUrl,
+        name: item.companyName,
+        websiteUrl: item.websiteUrl,
+        linkedinUrl: item.linkedinUrl,
+        wttjUrl: item.companyWttjUrl ?? item.offerWttjUrl,
+        location: item.location,
+        targetOfferUrl: item.offerWttjUrl,
       });
-
       if (result.ok) {
         created += 1;
       } else {
@@ -70,15 +78,8 @@ export default function DashboardPage() {
     if (created > 0) {
       toast.success(
         created === 1
-          ? "1 entreprise importée"
-          : `${created} entreprises importées`,
-      );
-    }
-    if (skipped > 0) {
-      toast.message(
-        skipped === 1
-          ? "1 entreprise déjà présente ignorée"
-          : `${skipped} entreprises déjà présentes ignorées`,
+          ? "1 entreprise ajoutée"
+          : `${created} entreprises ajoutées`,
       );
     }
   }
@@ -87,11 +88,12 @@ export default function DashboardPage() {
     <div className="flex min-h-0 flex-1 flex-col">
       <PageHeader
         title="Dashboard"
-        description="Recherche d'offres Welcome to the Jungle et import d'entreprises."
+        description="Découvrez des entreprises sur Welcome to the Jungle qui recrutent dans un domaine donné — sans les ajouter automatiquement."
       />
-      <div className="flex min-h-0 flex-1 flex-col gap-4 px-4 py-4 sm:px-6 md:px-8">
+      <div className="flex min-h-0 flex-1 flex-col gap-6 px-4 py-4 sm:px-6 md:px-8">
         <JobSearchForm
           isLoading={jobSearch.isLoading}
+          statusText={statusText}
           onSubmit={(query) => {
             void handleSearch(query);
           }}
@@ -102,21 +104,18 @@ export default function DashboardPage() {
           </p>
         ) : null}
         <div className="min-h-0 flex-1 overflow-auto">
-          <JobOfferList
-            offers={jobSearch.offers}
+          <CompanyPropositionList
+            propositions={propositions}
+            recruitmentContext={recruitmentContext}
             isLoading={jobSearch.isLoading}
             isIdle={jobSearch.isIdle}
             selection={selection}
+            isImporting={isImporting}
+            onImport={() => {
+              void handleImport();
+            }}
           />
         </div>
-        <ImportSelectionBar
-          selectedCount={selection.selectedCount}
-          isImporting={isImporting}
-          onClear={selection.clear}
-          onImport={() => {
-            void handleImport();
-          }}
-        />
       </div>
     </div>
   );
