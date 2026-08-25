@@ -6,6 +6,8 @@ pub enum AppError {
   InvalidSecretKey(String),
   #[error("Le secret ne peut pas être vide")]
   EmptySecret,
+  #[error("Jeton Bright Data manquant — configurez-le dans Settings")]
+  MissingBrightDataToken,
   #[error("Erreur keychain: {0}")]
   Keyring(String),
 }
