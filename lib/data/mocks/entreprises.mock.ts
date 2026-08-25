@@ -7,17 +7,24 @@ const ts = (iso: string) => ({
   updatedAt: toIsoDateTime(new Date(iso)),
 });
 
+const scrapeDefaults = {
+  location: null,
+  targetOfferUrl: null,
+  rawData: null,
+  scrapedAt: null,
+} as const;
+
 export const MOCK_ENTREPRISE_IDS = {
-  alan: createId<"Entreprise">("ent_alan"),
-  blaze: createId<"Entreprise">("ent_blaze"),
-  dataiku: createId<"Entreprise">("ent_dataiku"),
-  doctolib: createId<"Entreprise">("ent_doctolib"),
-  ledger: createId<"Entreprise">("ent_ledger"),
-  mirakl: createId<"Entreprise">("ent_mirakl"),
-  qonto: createId<"Entreprise">("ent_qonto"),
-  shift: createId<"Entreprise">("ent_shift"),
-  swoopin: createId<"Entreprise">("ent_swoopin"),
-  vestiaire: createId<"Entreprise">("ent_vestiaire"),
+  alan: createId<"Entreprise">("a0000001-0000-4000-8000-000000000001"),
+  blaze: createId<"Entreprise">("a0000002-0000-4000-8000-000000000002"),
+  dataiku: createId<"Entreprise">("a0000003-0000-4000-8000-000000000003"),
+  doctolib: createId<"Entreprise">("a0000004-0000-4000-8000-000000000004"),
+  ledger: createId<"Entreprise">("a0000005-0000-4000-8000-000000000005"),
+  mirakl: createId<"Entreprise">("a0000006-0000-4000-8000-000000000006"),
+  qonto: createId<"Entreprise">("a0000007-0000-4000-8000-000000000007"),
+  shift: createId<"Entreprise">("a0000008-0000-4000-8000-000000000008"),
+  swoopin: createId<"Entreprise">("a0000009-0000-4000-8000-000000000009"),
+  vestiaire: createId<"Entreprise">("a000000a-0000-4000-8000-00000000000a"),
 } as const;
 
 export const MOCK_ENTREPRISES: readonly Entreprise[] = [
@@ -28,6 +35,7 @@ export const MOCK_ENTREPRISES: readonly Entreprise[] = [
     websiteUrl: "https://alan.com",
     wttjUrl: "https://www.welcometothejungle.com/fr/companies/alan",
     notes: "Assurance santé — cible product / eng.",
+    ...scrapeDefaults,
     ...ts("2026-01-12T10:00:00.000Z"),
   },
   {
@@ -37,6 +45,7 @@ export const MOCK_ENTREPRISES: readonly Entreprise[] = [
     websiteUrl: "https://www.blaze.today",
     wttjUrl: "https://www.welcometothejungle.com/fr/companies/blaze",
     notes: null,
+    ...scrapeDefaults,
     ...ts("2026-01-15T09:30:00.000Z"),
   },
   {
@@ -46,6 +55,7 @@ export const MOCK_ENTREPRISES: readonly Entreprise[] = [
     websiteUrl: "https://www.dataiku.com",
     wttjUrl: "https://www.welcometothejungle.com/fr/companies/dataiku",
     notes: "Data science platform.",
+    ...scrapeDefaults,
     ...ts("2026-01-18T14:00:00.000Z"),
   },
   {
@@ -55,6 +65,7 @@ export const MOCK_ENTREPRISES: readonly Entreprise[] = [
     websiteUrl: "https://www.doctolib.fr",
     wttjUrl: "https://www.welcometothejungle.com/fr/companies/doctolib",
     notes: null,
+    ...scrapeDefaults,
     ...ts("2026-01-20T11:15:00.000Z"),
   },
   {
@@ -64,6 +75,7 @@ export const MOCK_ENTREPRISES: readonly Entreprise[] = [
     websiteUrl: "https://www.ledger.com",
     wttjUrl: "https://www.welcometothejungle.com/fr/companies/ledger",
     notes: "Hardware wallet — security / firmware.",
+    ...scrapeDefaults,
     ...ts("2026-01-22T16:45:00.000Z"),
   },
   {
@@ -73,6 +85,7 @@ export const MOCK_ENTREPRISES: readonly Entreprise[] = [
     websiteUrl: "https://www.mirakl.com",
     wttjUrl: "https://www.welcometothejungle.com/fr/companies/mirakl",
     notes: null,
+    ...scrapeDefaults,
     ...ts("2026-01-25T08:00:00.000Z"),
   },
   {
@@ -82,6 +95,7 @@ export const MOCK_ENTREPRISES: readonly Entreprise[] = [
     websiteUrl: "https://qonto.com",
     wttjUrl: "https://www.welcometothejungle.com/fr/companies/qonto",
     notes: "Néobanque B2B.",
+    ...scrapeDefaults,
     ...ts("2026-02-01T10:20:00.000Z"),
   },
   {
@@ -91,6 +105,7 @@ export const MOCK_ENTREPRISES: readonly Entreprise[] = [
     websiteUrl: "https://www.shift-technology.com",
     wttjUrl: "https://www.welcometothejungle.com/fr/companies/shift-technology",
     notes: null,
+    ...scrapeDefaults,
     ...ts("2026-02-03T13:00:00.000Z"),
   },
   {
@@ -100,6 +115,7 @@ export const MOCK_ENTREPRISES: readonly Entreprise[] = [
     websiteUrl: "https://www.swile.co",
     wttjUrl: "https://www.welcometothejungle.com/fr/companies/swile",
     notes: "Avantages salariés.",
+    ...scrapeDefaults,
     ...ts("2026-02-05T09:00:00.000Z"),
   },
   {
@@ -109,6 +125,7 @@ export const MOCK_ENTREPRISES: readonly Entreprise[] = [
     websiteUrl: "https://www.vestiairecollective.com",
     wttjUrl: "https://www.welcometothejungle.com/fr/companies/vestiaire-collective",
     notes: null,
+    ...scrapeDefaults,
     ...ts("2026-02-08T15:30:00.000Z"),
   },
 ];
