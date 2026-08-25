@@ -4,7 +4,7 @@ use crate::error::AppError;
 
 const SERVICE_NAME: &str = "com.personalcrm.app";
 
-const ALLOWED_KEYS: &[&str] = &["bright_data_token", "supabase_anon_key"];
+const ALLOWED_KEYS: &[&str] = &["bright_data_token"];
 
 fn assert_allowed_key(key: &str) -> Result<(), AppError> {
   if ALLOWED_KEYS.contains(&key) {
