@@ -7,6 +7,7 @@ import { EntrepriseEditSheet } from "@/components/entreprise/entreprise-edit-she
 import { EntrepriseTable } from "@/components/entreprise/entreprise-table";
 import { EntrepriseToolbar } from "@/components/entreprise/entreprise-toolbar";
 import { PageHeader } from "@/components/layout/page-header";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useEntreprises } from "@/hooks/use-entreprises";
 import { useRowSelection } from "@/hooks/use-row-selection";
 import type { Entreprise, EntrepriseId } from "@/lib/domain/entreprise";
@@ -25,28 +26,25 @@ export default function EntreprisePage() {
   } = useEntreprises();
   const selection = useRowSelection<EntrepriseId>();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [activeEntreprise, setActiveEntreprise] = useState<Entreprise | null>(
     null,
   );
 
-  async function handleDeleteSelected(): Promise<void> {
+  const selectedCount = selection.selectedCount;
+
+  async function executeDelete(): Promise<void> {
     const ids = [...selection.selectedIds];
     if (ids.length === 0) {
-      return;
-    }
-    const confirmed = window.confirm(
-      ids.length === 1
-        ? "Supprimer cette entreprise ?"
-        : `Supprimer ${ids.length} entreprises ?`,
-    );
-    if (!confirmed) {
+      setConfirmOpen(false);
       return;
     }
 
     setIsDeleting(true);
     const result = await removeMany(ids);
     setIsDeleting(false);
+    setConfirmOpen(false);
 
     if (!result.ok) {
       toast.error(result.error.message);
@@ -88,11 +86,11 @@ export default function EntreprisePage() {
         <EntrepriseToolbar
           search={search}
           onSearchChange={setSearch}
-          selectedCount={selection.selectedCount}
+          selectedCount={selectedCount}
           isDeleting={isDeleting}
           onCreate={handleCreate}
           onDeleteSelected={() => {
-            void handleDeleteSelected();
+            setConfirmOpen(true);
           }}
         />
         {error !== null ? (
@@ -119,6 +117,23 @@ export default function EntreprisePage() {
         onOpenChange={setSheetOpen}
         onCreate={create}
         onUpdate={update}
+      />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title={
+          selectedCount === 1
+            ? "Supprimer cette entreprise ?"
+            : `Supprimer ${selectedCount} entreprises ?`
+        }
+        description="Cette action est définitive. Les contacts liés resteront, sans entreprise."
+        confirmLabel="Supprimer"
+        destructive
+        isConfirming={isDeleting}
+        onOpenChange={setConfirmOpen}
+        onConfirm={() => {
+          void executeDelete();
+        }}
       />
     </div>
   );
