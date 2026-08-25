@@ -5,10 +5,7 @@ import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useRepositories } from "@/components/providers/repository-provider";
 import type { DomainError } from "@/lib/domain/shared/errors";
 import type { Result } from "@/lib/domain/shared/result";
-import type {
-  PublicSettingKey,
-  SecretKey,
-} from "@/lib/repositories/ports/settings.port";
+import type { SecretKey } from "@/lib/repositories/ports/settings.port";
 
 /**
  * Settings facade over SettingsPort.
@@ -19,9 +16,6 @@ export function useSettings() {
   const [secretPresence, setSecretPresence] = useState<
     Partial<Record<SecretKey, boolean>>
   >({});
-  const [publicSettings, setPublicSettings] = useState<
-    Partial<Record<PublicSettingKey, string | null>>
-  >({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<DomainError | null>(null);
   const isMountedRef = useRef(true);
@@ -30,11 +24,7 @@ export function useSettings() {
     setIsLoading(true);
     setError(null);
 
-    const [bright, supabaseKey, supabaseUrl] = await Promise.all([
-      settings.hasSecret("bright_data_token"),
-      settings.hasSecret("supabase_anon_key"),
-      settings.getPublicSetting("supabase_url"),
-    ]);
+    const bright = await settings.hasSecret("bright_data_token");
 
     if (!isMountedRef.current) {
       return;
@@ -45,23 +35,9 @@ export function useSettings() {
       setIsLoading(false);
       return;
     }
-    if (!supabaseKey.ok) {
-      setError(supabaseKey.error);
-      setIsLoading(false);
-      return;
-    }
-    if (!supabaseUrl.ok) {
-      setError(supabaseUrl.error);
-      setIsLoading(false);
-      return;
-    }
 
     setSecretPresence({
       bright_data_token: bright.value,
-      supabase_anon_key: supabaseKey.value,
-    });
-    setPublicSettings({
-      supabase_url: supabaseUrl.value,
     });
     setIsLoading(false);
   });
@@ -98,27 +74,11 @@ export function useSettings() {
     return result;
   }
 
-  async function savePublicSetting(
-    key: PublicSettingKey,
-    value: string,
-  ): Promise<Result<void, DomainError>> {
-    const result = await settings.setPublicSetting(key, value);
-    if (result.ok) {
-      setPublicSettings((previous) => ({
-        ...previous,
-        [key]: value.trim().length === 0 ? null : value.trim(),
-      }));
-    }
-    return result;
-  }
-
   return {
     isLoading,
     error,
     secretPresence,
-    publicSettings,
     saveSecret,
     clearSecret,
-    savePublicSetting,
   };
 }
