@@ -5,8 +5,8 @@ import type { JobSearchPort } from "@/lib/repositories/ports/job-search.port";
 import { simulateLatency } from "@/lib/repositories/mock/in-memory-store";
 
 /**
- * Stand-in for Bright Data collection via Tauri.
- * Filters fixture WTTJ-like rows locally until the Rust HTTP bridge lands.
+ * Browser stand-in for Bright Data SERP (Tauri only in production).
+ * Filters local fixture rows — no real network.
  */
 export class MockJobSearchRepository implements JobSearchPort {
   async search(query: JobSearchQuery) {
