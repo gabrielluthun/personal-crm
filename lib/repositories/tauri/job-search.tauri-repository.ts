@@ -1,5 +1,6 @@
 import type { JobSearchQuery } from "@/lib/domain/job-offer";
 import type { JobSearchPort } from "@/lib/repositories/ports/job-search.port";
+import { testBrightDataConnection } from "@/lib/tauri/bright-data";
 import { searchJobs } from "@/lib/tauri/job-search";
 
 /**
@@ -8,5 +9,9 @@ import { searchJobs } from "@/lib/tauri/job-search";
 export class TauriJobSearchRepository implements JobSearchPort {
   async search(query: JobSearchQuery) {
     return searchJobs(query);
+  }
+
+  async probeConnection() {
+    return testBrightDataConnection();
   }
 }

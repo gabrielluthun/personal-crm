@@ -32,7 +32,7 @@ export class MockContactRepository implements ContactPort {
     if (search) {
       items = items.filter((item) => {
         const haystack =
-          `${item.firstName} ${item.lastName} ${item.email ?? ""}`.toLowerCase();
+          `${item.firstName} ${item.lastName} ${item.email ?? ""} ${item.jobTitle ?? ""} ${item.headline ?? ""}`.toLowerCase();
         return haystack.includes(search);
       });
     }
@@ -67,14 +67,18 @@ export class MockContactRepository implements ContactPort {
 
   async create(input: ContactCreateInput) {
     const created: Contact = {
-      id: generateId<"Contact">("ct"),
+      id: generateId<"Contact">(),
       firstName: input.firstName.trim(),
       lastName: input.lastName.trim(),
       email: input.email ?? null,
       linkedinUrl: input.linkedinUrl ?? null,
+      jobTitle: input.jobTitle ?? null,
+      headline: input.headline ?? null,
       status: input.status ?? "À contacter",
       entrepriseId: input.entrepriseId ?? null,
       notes: input.notes ?? null,
+      rawData: input.rawData ?? null,
+      scrapedAt: input.scrapedAt ?? null,
       ...createTimestamps(),
     };
     return ok(await this.store.insert(created));
@@ -92,12 +96,17 @@ export class MockContactRepository implements ContactPort {
       email: input.email === undefined ? current.email : input.email,
       linkedinUrl:
         input.linkedinUrl === undefined ? current.linkedinUrl : input.linkedinUrl,
+      jobTitle: input.jobTitle === undefined ? current.jobTitle : input.jobTitle,
+      headline: input.headline === undefined ? current.headline : input.headline,
       status: input.status ?? current.status,
       entrepriseId:
         input.entrepriseId === undefined
           ? current.entrepriseId
           : input.entrepriseId,
       notes: input.notes === undefined ? current.notes : input.notes,
+      rawData: input.rawData === undefined ? current.rawData : input.rawData,
+      scrapedAt:
+        input.scrapedAt === undefined ? current.scrapedAt : input.scrapedAt,
       ...touchUpdatedAt(current),
     };
     const saved = await this.store.replace(id, updated);
@@ -107,5 +116,16 @@ export class MockContactRepository implements ContactPort {
   async delete(id: ContactId) {
     const removed = await this.store.remove(id);
     return removed ? ok(undefined) : err(notFoundError("Contact", id));
+  }
+
+  async deleteMany(ids: readonly ContactId[]) {
+    if (ids.length === 0) {
+      return ok(undefined);
+    }
+    const removed = await this.store.removeMany(ids);
+    if (removed === 0) {
+      return err(notFoundError("Contact"));
+    }
+    return ok(undefined);
   }
 }

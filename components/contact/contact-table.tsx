@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { createContactColumns } from "@/components/contact/contact-columns";
 import { DataTable } from "@/components/data-table/data-table";
+import type { RowSelection } from "@/hooks/use-row-selection";
 import type {
   Contact,
   ContactId,
@@ -18,6 +19,7 @@ import type { Result } from "@/lib/domain/shared/result";
 type ContactTableProps = {
   readonly items: readonly Contact[];
   readonly isLoading: boolean;
+  readonly selection: RowSelection<ContactId>;
   readonly onRowClick: (contact: Contact) => void;
   readonly onUpdate: (
     id: ContactId,
@@ -28,10 +30,12 @@ type ContactTableProps = {
 export function ContactTable({
   items,
   isLoading,
+  selection,
   onRowClick,
   onUpdate,
 }: ContactTableProps) {
   const [updatingId, setUpdatingId] = useState<ContactId | null>(null);
+  const visibleIds = items.map((item) => item.id);
 
   async function patch(
     id: ContactId,
@@ -47,6 +51,12 @@ export function ContactTable({
 
   const columns = createContactColumns({
     updatingId,
+    isSelected: selection.isSelected,
+    onToggle: selection.toggle,
+    headerState: selection.headerState(visibleIds),
+    onToggleAll: () => {
+      selection.toggleAll(visibleIds);
+    },
     onStatusChange: (id: ContactId, status: ContactStatus) => {
       void patch(id, { status });
     },
@@ -64,6 +74,7 @@ export function ContactTable({
       rows={items}
       getRowId={(row) => row.id}
       isLoading={isLoading}
+      selectedIds={selection.selectedIds}
       onRowClick={onRowClick}
       emptyTitle="Aucun contact"
       emptyDescription="Ajoutez un contact ou changez d'onglet / de recherche."

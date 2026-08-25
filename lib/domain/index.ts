@@ -31,8 +31,18 @@ export type {
 } from "@/lib/domain/job-offer";
 
 export type {
+  Interaction,
+  InteractionCreateInput,
+  InteractionId,
+  InteractionUpdateInput,
+} from "@/lib/domain/interaction";
+
+export type {
   MessageTemplate,
   MessageTemplateCreateInput,
   MessageTemplateUpdateInput,
   TemplateId,
 } from "@/lib/domain/template";
+
+export { createId, generateId } from "@/lib/domain/shared/id";
+export type { JsonValue } from "@/lib/domain/shared/json";

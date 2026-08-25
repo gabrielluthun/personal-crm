@@ -8,6 +8,12 @@ pub enum AppError {
   EmptySecret,
   #[error("Jeton Bright Data manquant — configurez-le dans Settings")]
   MissingBrightDataToken,
+  #[error("Jeton Bright Data refusé (401/403) — vérifiez la clé API")]
+  BrightDataUnauthorized,
+  #[error("Bright Data a répondu HTTP {0}")]
+  BrightDataHttp(u16),
+  #[error("Impossible de joindre Bright Data: {0}")]
+  BrightDataNetwork(String),
   #[error("Erreur keychain: {0}")]
   Keyring(String),
 }

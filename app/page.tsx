@@ -53,6 +53,8 @@ export default function DashboardPage() {
         websiteUrl: offer.companyWebsiteUrl,
         linkedinUrl: offer.companyLinkedinUrl,
         wttjUrl: offer.wttjUrl,
+        location: offer.location,
+        targetOfferUrl: offer.wttjUrl,
       });
 
       if (result.ok) {

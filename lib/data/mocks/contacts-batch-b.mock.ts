@@ -8,10 +8,18 @@ const ts = (iso: string) => ({
   updatedAt: toIsoDateTime(new Date(iso)),
 });
 
+const scrapeDefaults = {
+  jobTitle: null,
+  headline: null,
+  rawData: null,
+  scrapedAt: null,
+} as const;
+
+
 /** Second half of mock contacts. */
 export const MOCK_CONTACTS_BATCH_B: readonly Contact[] = [
   {
-    id: createId("ct_12"),
+    id: createId("b0000000-0000-4000-8000-00000000000c"),
     firstName: "Adam",
     lastName: "Fournier",
     email: null,
@@ -19,10 +27,11 @@ export const MOCK_CONTACTS_BATCH_B: readonly Contact[] = [
     status: "Relance 1",
     entrepriseId: E.qonto,
     notes: "Pas d'email public.",
+    ...scrapeDefaults,
     ...ts("2026-02-15T12:00:00.000Z"),
   },
   {
-    id: createId("ct_13"),
+    id: createId("b0000000-0000-4000-8000-00000000000d"),
     firstName: "Lina",
     lastName: "Girard",
     email: "lina.girard@alan.com",
@@ -30,10 +39,11 @@ export const MOCK_CONTACTS_BATCH_B: readonly Contact[] = [
     status: "Call prévu",
     entrepriseId: E.alan,
     notes: null,
+    ...scrapeDefaults,
     ...ts("2026-02-16T08:00:00.000Z"),
   },
   {
-    id: createId("ct_14"),
+    id: createId("b0000000-0000-4000-8000-00000000000e"),
     firstName: "Tom",
     lastName: "André",
     email: "tom.andre@dataiku.com",
@@ -41,10 +51,11 @@ export const MOCK_CONTACTS_BATCH_B: readonly Contact[] = [
     status: "À contacter",
     entrepriseId: E.dataiku,
     notes: null,
+    ...scrapeDefaults,
     ...ts("2026-02-16T09:00:00.000Z"),
   },
   {
-    id: createId("ct_15"),
+    id: createId("b0000000-0000-4000-8000-00000000000f"),
     firstName: "Emma",
     lastName: "Mercier",
     email: "emma.mercier@doctolib.fr",
@@ -52,10 +63,11 @@ export const MOCK_CONTACTS_BATCH_B: readonly Contact[] = [
     status: "Relance 2",
     entrepriseId: E.doctolib,
     notes: null,
+    ...scrapeDefaults,
     ...ts("2026-02-17T10:00:00.000Z"),
   },
   {
-    id: createId("ct_16"),
+    id: createId("b0000000-0000-4000-8000-000000000010"),
     firstName: "Nathan",
     lastName: "Blanc",
     email: "nathan.blanc@ledger.com",
@@ -63,10 +75,11 @@ export const MOCK_CONTACTS_BATCH_B: readonly Contact[] = [
     status: "Contacté",
     entrepriseId: E.ledger,
     notes: null,
+    ...scrapeDefaults,
     ...ts("2026-02-17T11:00:00.000Z"),
   },
   {
-    id: createId("ct_17"),
+    id: createId("b0000000-0000-4000-8000-000000000011"),
     firstName: "Zoé",
     lastName: "Guerin",
     email: "zoe.guerin@mirakl.com",
@@ -74,10 +87,11 @@ export const MOCK_CONTACTS_BATCH_B: readonly Contact[] = [
     status: "Refus",
     entrepriseId: E.mirakl,
     notes: null,
+    ...scrapeDefaults,
     ...ts("2026-02-18T09:00:00.000Z"),
   },
   {
-    id: createId("ct_18"),
+    id: createId("b0000000-0000-4000-8000-000000000012"),
     firstName: "Paul",
     lastName: "Renaud",
     email: "paul.renaud@blaze.today",
@@ -85,10 +99,11 @@ export const MOCK_CONTACTS_BATCH_B: readonly Contact[] = [
     status: "Terminé",
     entrepriseId: E.blaze,
     notes: null,
+    ...scrapeDefaults,
     ...ts("2026-02-18T14:00:00.000Z"),
   },
   {
-    id: createId("ct_19"),
+    id: createId("b0000000-0000-4000-8000-000000000013"),
     firstName: "Alice",
     lastName: "Perrin",
     email: null,
@@ -96,10 +111,11 @@ export const MOCK_CONTACTS_BATCH_B: readonly Contact[] = [
     status: "À contacter",
     entrepriseId: null,
     notes: "Freelance — pas encore d'entreprise liée.",
+    ...scrapeDefaults,
     ...ts("2026-02-19T10:00:00.000Z"),
   },
   {
-    id: createId("ct_20"),
+    id: createId("b0000000-0000-4000-8000-000000000014"),
     firstName: "Maxime",
     lastName: "Caron",
     email: "maxime.caron@swile.co",
@@ -107,10 +123,11 @@ export const MOCK_CONTACTS_BATCH_B: readonly Contact[] = [
     status: "En discussion",
     entrepriseId: E.swoopin,
     notes: null,
+    ...scrapeDefaults,
     ...ts("2026-02-19T15:00:00.000Z"),
   },
   {
-    id: createId("ct_21"),
+    id: createId("b0000000-0000-4000-8000-000000000015"),
     firstName: "Sarah",
     lastName: "Robin",
     email: "sarah.robin@vestiairecollective.com",
@@ -118,10 +135,11 @@ export const MOCK_CONTACTS_BATCH_B: readonly Contact[] = [
     status: "Relance 1",
     entrepriseId: E.vestiaire,
     notes: null,
+    ...scrapeDefaults,
     ...ts("2026-02-20T09:00:00.000Z"),
   },
   {
-    id: createId("ct_22"),
+    id: createId("b0000000-0000-4000-8000-000000000016"),
     firstName: "Jules",
     lastName: "Gauthier",
     email: "jules.gauthier@shift-technology.com",
@@ -129,6 +147,7 @@ export const MOCK_CONTACTS_BATCH_B: readonly Contact[] = [
     status: "Call prévu",
     entrepriseId: E.shift,
     notes: "Intro via un ancien collègue.",
+    ...scrapeDefaults,
     ...ts("2026-02-20T11:30:00.000Z"),
   },
 ];

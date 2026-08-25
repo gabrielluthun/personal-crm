@@ -31,7 +31,7 @@ export class MockTemplateRepository implements TemplatePort {
     if (search) {
       items = items.filter((item) => {
         const haystack =
-          `${item.title} ${item.description ?? ""} ${item.body}`.toLowerCase();
+          `${item.title} ${item.description ?? ""} ${item.body} ${item.channel}`.toLowerCase();
         return haystack.includes(search);
       });
     }
@@ -49,10 +49,12 @@ export class MockTemplateRepository implements TemplatePort {
 
   async create(input: MessageTemplateCreateInput) {
     const created: MessageTemplate = {
-      id: generateId<"Template">("tpl"),
+      id: generateId<"Template">(),
       title: input.title.trim(),
       body: input.body,
       description: input.description ?? null,
+      channel: input.channel?.trim() || "linkedin",
+      subject: input.subject ?? null,
       ...createTimestamps(),
     };
     return ok(await this.store.insert(created));
@@ -69,6 +71,8 @@ export class MockTemplateRepository implements TemplatePort {
       body: input.body ?? current.body,
       description:
         input.description === undefined ? current.description : input.description,
+      channel: input.channel?.trim() ?? current.channel,
+      subject: input.subject === undefined ? current.subject : input.subject,
       ...touchUpdatedAt(current),
     };
     const saved = await this.store.replace(id, updated);

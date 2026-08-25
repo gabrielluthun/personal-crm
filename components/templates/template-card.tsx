@@ -32,6 +32,10 @@ export function TemplateCard({ template, onPreview }: TemplateCardProps) {
         {template.description !== null ? (
           <CardDescription>{template.description}</CardDescription>
         ) : null}
+        <CardDescription className="capitalize">
+          Canal : {template.channel}
+          {template.subject ? ` · Objet : ${template.subject}` : ""}
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-3">
         <p className="whitespace-pre-wrap text-sm text-muted-foreground">

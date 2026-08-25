@@ -12,12 +12,18 @@ import type { ContactStatus } from "@/lib/domain/contact-status";
 import type { EntrepriseId } from "@/lib/domain/entreprise";
 import type { DomainError } from "@/lib/domain/shared/errors";
 import type { Result } from "@/lib/domain/shared/result";
+import {
+  hasContactFieldErrors,
+  validateContactForm,
+} from "@/hooks/use-contact-form-validation";
 
 export type ContactFormValues = {
   readonly firstName: string;
   readonly lastName: string;
   readonly email: string;
   readonly linkedinUrl: string;
+  readonly jobTitle: string;
+  readonly headline: string;
   readonly status: ContactStatus;
   readonly entrepriseId: EntrepriseId | null;
   readonly notes: string;
@@ -47,6 +53,8 @@ const EMPTY_VALUES: ContactFormValues = {
   lastName: "",
   email: "",
   linkedinUrl: "",
+  jobTitle: "",
+  headline: "",
   status: "À contacter",
   entrepriseId: null,
   notes: "",
@@ -84,7 +92,7 @@ export function useContactForm({
   async function submit(): Promise<boolean> {
     const errors = validateContactForm(values);
     setFieldErrors(errors);
-    if (hasFieldErrors(errors)) {
+    if (hasContactFieldErrors(errors)) {
       return false;
     }
 
@@ -128,6 +136,8 @@ function toFormValues(contact: Contact | null): ContactFormValues {
     lastName: contact.lastName,
     email: contact.email ?? "",
     linkedinUrl: contact.linkedinUrl ?? "",
+    jobTitle: contact.jobTitle ?? "",
+    headline: contact.headline ?? "",
     status: contact.status,
     entrepriseId: contact.entrepriseId,
     notes: contact.notes ?? "",
@@ -140,6 +150,8 @@ function toSubmitInput(values: ContactFormValues): ContactCreateInput {
     lastName: values.lastName.trim(),
     email: emptyToNull(values.email),
     linkedinUrl: emptyToNull(values.linkedinUrl),
+    jobTitle: emptyToNull(values.jobTitle),
+    headline: emptyToNull(values.headline),
     status: values.status,
     entrepriseId: values.entrepriseId,
     notes: emptyToNull(values.notes),
@@ -149,51 +161,4 @@ function toSubmitInput(values: ContactFormValues): ContactCreateInput {
 function emptyToNull(value: string): string | null {
   const trimmed = value.trim();
   return trimmed.length === 0 ? null : trimmed;
-}
-
-function validateContactForm(values: ContactFormValues): ContactFormErrors {
-  return {
-    firstName:
-      values.firstName.trim().length === 0
-        ? "Le prénom est obligatoire"
-        : undefined,
-    lastName:
-      values.lastName.trim().length === 0
-        ? "Le nom est obligatoire"
-        : undefined,
-    email: isOptionalEmail(values.email) ? undefined : "Email invalide",
-    linkedinUrl: isOptionalHttpUrl(values.linkedinUrl)
-      ? undefined
-      : "URL LinkedIn invalide",
-  };
-}
-
-function hasFieldErrors(errors: ContactFormErrors): boolean {
-  return (
-    errors.firstName !== undefined ||
-    errors.lastName !== undefined ||
-    errors.email !== undefined ||
-    errors.linkedinUrl !== undefined
-  );
-}
-
-function isOptionalEmail(value: string): boolean {
-  const trimmed = value.trim();
-  if (trimmed.length === 0) {
-    return true;
-  }
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
-}
-
-function isOptionalHttpUrl(value: string): boolean {
-  const trimmed = value.trim();
-  if (trimmed.length === 0) {
-    return true;
-  }
-  try {
-    const url = new URL(trimmed);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
 }

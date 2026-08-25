@@ -12,8 +12,10 @@ import {
   createTimestamps,
   touchUpdatedAt,
 } from "@/lib/domain/shared/timestamps";
-import type { EntreprisePort } from "@/lib/repositories/ports/entreprise.port";
-import type { EntrepriseListQuery } from "@/lib/repositories/ports/entreprise.port";
+import type {
+  EntrepriseListQuery,
+  EntreprisePort,
+} from "@/lib/repositories/ports/entreprise.port";
 import {
   InMemoryStore,
   compareStrings,
@@ -27,7 +29,10 @@ export class MockEntrepriseRepository implements EntreprisePort {
     let items = [...(await this.store.all())];
     const search = query.search?.trim().toLowerCase();
     if (search) {
-      items = items.filter((item) => item.name.toLowerCase().includes(search));
+      items = items.filter((item) => {
+        const haystack = `${item.name} ${item.location ?? ""}`.toLowerCase();
+        return haystack.includes(search);
+      });
     }
     const sort = query.sort ?? { field: "name", direction: "asc" };
     items.sort((left, right) => {
@@ -50,12 +55,16 @@ export class MockEntrepriseRepository implements EntreprisePort {
   async create(input: EntrepriseCreateInput) {
     const timestamps = createTimestamps();
     const created: Entreprise = {
-      id: generateId<"Entreprise">("ent"),
+      id: generateId<"Entreprise">(),
       name: input.name.trim(),
       linkedinUrl: input.linkedinUrl ?? null,
       websiteUrl: input.websiteUrl ?? null,
       wttjUrl: input.wttjUrl ?? null,
+      location: input.location ?? null,
+      targetOfferUrl: input.targetOfferUrl ?? null,
       notes: input.notes ?? null,
+      rawData: input.rawData ?? null,
+      scrapedAt: input.scrapedAt ?? null,
       ...timestamps,
     };
     return ok(await this.store.insert(created));
@@ -74,7 +83,15 @@ export class MockEntrepriseRepository implements EntreprisePort {
       websiteUrl:
         input.websiteUrl === undefined ? current.websiteUrl : input.websiteUrl,
       wttjUrl: input.wttjUrl === undefined ? current.wttjUrl : input.wttjUrl,
+      location: input.location === undefined ? current.location : input.location,
+      targetOfferUrl:
+        input.targetOfferUrl === undefined
+          ? current.targetOfferUrl
+          : input.targetOfferUrl,
       notes: input.notes === undefined ? current.notes : input.notes,
+      rawData: input.rawData === undefined ? current.rawData : input.rawData,
+      scrapedAt:
+        input.scrapedAt === undefined ? current.scrapedAt : input.scrapedAt,
       ...touchUpdatedAt(current),
     };
     const saved = await this.store.replace(id, updated);

@@ -16,6 +16,8 @@ export type EntrepriseFormValues = {
   readonly linkedinUrl: string;
   readonly websiteUrl: string;
   readonly wttjUrl: string;
+  readonly location: string;
+  readonly targetOfferUrl: string;
   readonly notes: string;
 };
 
@@ -24,6 +26,7 @@ export type EntrepriseFormErrors = {
   readonly linkedinUrl?: string;
   readonly websiteUrl?: string;
   readonly wttjUrl?: string;
+  readonly targetOfferUrl?: string;
 };
 
 type UseEntrepriseFormOptions = {
@@ -43,6 +46,8 @@ const EMPTY_VALUES: EntrepriseFormValues = {
   linkedinUrl: "",
   websiteUrl: "",
   wttjUrl: "",
+  location: "",
+  targetOfferUrl: "",
   notes: "",
 };
 
@@ -122,6 +127,8 @@ function toFormValues(entreprise: Entreprise | null): EntrepriseFormValues {
     linkedinUrl: entreprise.linkedinUrl ?? "",
     websiteUrl: entreprise.websiteUrl ?? "",
     wttjUrl: entreprise.wttjUrl ?? "",
+    location: entreprise.location ?? "",
+    targetOfferUrl: entreprise.targetOfferUrl ?? "",
     notes: entreprise.notes ?? "",
   };
 }
@@ -132,6 +139,8 @@ function toSubmitInput(values: EntrepriseFormValues): EntrepriseCreateInput {
     linkedinUrl: emptyToNull(values.linkedinUrl),
     websiteUrl: emptyToNull(values.websiteUrl),
     wttjUrl: emptyToNull(values.wttjUrl),
+    location: emptyToNull(values.location),
+    targetOfferUrl: emptyToNull(values.targetOfferUrl),
     notes: emptyToNull(values.notes),
   };
 }
@@ -156,6 +165,9 @@ function validateEntrepriseForm(
     wttjUrl: isOptionalHttpUrl(values.wttjUrl)
       ? undefined
       : "URL Welcome to the Jungle invalide",
+    targetOfferUrl: isOptionalHttpUrl(values.targetOfferUrl)
+      ? undefined
+      : "URL de l'offre invalide",
   };
 }
 
@@ -164,7 +176,8 @@ function hasFieldErrors(errors: EntrepriseFormErrors): boolean {
     errors.name !== undefined ||
     errors.linkedinUrl !== undefined ||
     errors.websiteUrl !== undefined ||
-    errors.wttjUrl !== undefined
+    errors.wttjUrl !== undefined ||
+    errors.targetOfferUrl !== undefined
   );
 }
 

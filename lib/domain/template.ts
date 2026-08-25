@@ -12,16 +12,22 @@ export type MessageTemplate = Timestamps & {
   readonly title: string;
   readonly body: string;
   readonly description: string | null;
+  readonly channel: string;
+  readonly subject: string | null;
 };
 
 export type MessageTemplateCreateInput = {
   readonly title: string;
   readonly body: string;
   readonly description?: string | null;
+  readonly channel?: string;
+  readonly subject?: string | null;
 };
 
 export type MessageTemplateUpdateInput = {
   readonly title?: string;
   readonly body?: string;
   readonly description?: string | null;
+  readonly channel?: string;
+  readonly subject?: string | null;
 };

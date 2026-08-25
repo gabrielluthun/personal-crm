@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-bright-data-probe"
+description = "Allow Bright Data credential probe (token stays in keychain)"
+commands.allow = ["test_bright_data_connection"]

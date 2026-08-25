@@ -1,5 +1,4 @@
 import type {
-  Contact,
   ContactCreateInput,
   ContactId,
   ContactUpdateInput,
@@ -9,12 +8,8 @@ import {
   notFoundError,
   repositoryError,
 } from "@/lib/domain/shared/errors";
-import { generateId } from "@/lib/domain/shared/id";
 import { err, ok } from "@/lib/domain/shared/result";
-import {
-  createTimestamps,
-  touchUpdatedAt,
-} from "@/lib/domain/shared/timestamps";
+import { createTimestamps } from "@/lib/domain/shared/timestamps";
 import type {
   ContactListQuery,
   ContactPort,
@@ -25,7 +20,9 @@ import {
   type AppSupabaseClient,
 } from "@/lib/supabase/client";
 import { containsFilterValue } from "@/lib/supabase/filters";
-import { mapContactRow, mapContactToInsert } from "@/lib/supabase/mappers";
+import { mapContactInsert, mapContactRow } from "@/lib/supabase/mappers";
+import { interpretDeleteCount } from "@/lib/repositories/supabase/interpret-delete-count";
+import { mergeContactUpdate } from "@/lib/repositories/supabase/merge-contact-update";
 
 export class SupabaseContactRepository implements ContactPort {
   constructor(private readonly client: AppSupabaseClient = getSupabaseClient()) {}
@@ -38,7 +35,7 @@ export class SupabaseContactRepository implements ContactPort {
     if (query.search?.trim()) {
       const term = containsFilterValue(query.search.trim());
       builder = builder.or(
-        `first_name.ilike.${term},last_name.ilike.${term},email.ilike.${term}`,
+        `first_name.ilike.${term},last_name.ilike.${term},email.ilike.${term},job_title.ilike.${term},headline.ilike.${term}`,
       );
     }
     if (query.status) {
@@ -104,20 +101,25 @@ export class SupabaseContactRepository implements ContactPort {
   }
 
   async create(input: ContactCreateInput) {
-    const entity: Contact = {
-      id: generateId<"Contact">("ct"),
-      firstName: input.firstName.trim(),
-      lastName: input.lastName.trim(),
-      email: input.email ?? null,
-      linkedinUrl: input.linkedinUrl ?? null,
-      status: input.status ?? "À contacter",
-      entrepriseId: input.entrepriseId ?? null,
-      notes: input.notes ?? null,
-      ...createTimestamps(),
-    };
+    const timestamps = createTimestamps();
     const { data, error } = await this.client
       .from("contacts")
-      .insert(mapContactToInsert(entity))
+      .insert(
+        mapContactInsert({
+          firstName: input.firstName.trim(),
+          lastName: input.lastName.trim(),
+          email: input.email ?? null,
+          linkedinUrl: input.linkedinUrl ?? null,
+          jobTitle: input.jobTitle ?? null,
+          headline: input.headline ?? null,
+          status: input.status ?? "À contacter",
+          entrepriseId: input.entrepriseId ?? null,
+          notes: input.notes ?? null,
+          rawData: input.rawData ?? null,
+          scrapedAt: input.scrapedAt ?? null,
+          ...timestamps,
+        }),
+      )
       .select("*")
       .single();
     if (error) {
@@ -131,26 +133,10 @@ export class SupabaseContactRepository implements ContactPort {
     if (!current.ok) {
       return current;
     }
-    const updated: Contact = {
-      ...current.value,
-      firstName: input.firstName?.trim() ?? current.value.firstName,
-      lastName: input.lastName?.trim() ?? current.value.lastName,
-      email: input.email === undefined ? current.value.email : input.email,
-      linkedinUrl:
-        input.linkedinUrl === undefined
-          ? current.value.linkedinUrl
-          : input.linkedinUrl,
-      status: input.status ?? current.value.status,
-      entrepriseId:
-        input.entrepriseId === undefined
-          ? current.value.entrepriseId
-          : input.entrepriseId,
-      notes: input.notes === undefined ? current.value.notes : input.notes,
-      ...touchUpdatedAt(current.value),
-    };
+    const updated = mergeContactUpdate(current.value, input);
     const { data, error } = await this.client
       .from("contacts")
-      .update(mapContactToInsert(updated))
+      .update(mapContactInsert(updated))
       .eq("id", id)
       .select("*")
       .single();
@@ -172,5 +158,19 @@ export class SupabaseContactRepository implements ContactPort {
       return err(notFoundError("Contact", id));
     }
     return ok(undefined);
+  }
+
+  async deleteMany(ids: readonly ContactId[]) {
+    if (ids.length === 0) {
+      return ok(undefined);
+    }
+    const { error, count } = await this.client
+      .from("contacts")
+      .delete({ count: "exact" })
+      .in("id", [...ids]);
+    if (error) {
+      return err(repositoryError(error.message, error));
+    }
+    return interpretDeleteCount(count, ids.length, "contacts");
   }
 }

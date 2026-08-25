@@ -1,109 +1,38 @@
-# personal-crm
+# Personal CRM
 
-CRM personnel de prospection et de recherche d'emploi, packagé en application de
-bureau. Il centralise les entreprises ciblées, les contacts, le suivi des
-échanges, la collecte d'offres Welcome to the Jungle et les modèles de message.
+CRM perso de prospection / recherche d'emploi (app de bureau Tauri).
+Single-user, pas d'auth dans l'app.
 
-## Stack
+## Lancer
 
-| Couche | Technologie |
-| --- | --- |
-| Enveloppe desktop | Tauri v2 (Rust) |
-| Frontend | Next.js 16, App Router, export statique |
-| Langage | TypeScript strict |
-| Styles | Tailwind CSS v4 |
-| Composants | shadcn/ui (Base UI), Lucide |
-| Thème | next-themes |
-| Données CRM | mocks (défaut) ou Supabase (opt-in) |
-| Secrets | trousseau OS via Rust (`keyring`) |
-
-## Prérequis
-
-- Node.js 20+
-- pnpm 11+
-- Rust stable + dépendances système 
-
-## Démarrage
+Prérequis : Node 20+, pnpm 11+, Rust + [deps Tauri](https://v2.tauri.app/start/prerequisites/).
 
 ```bash
 pnpm install
-cp .env.local.example .env.local   # optionnel, pour Supabase plus tard
-
-pnpm tauri:dev     # fenêtre desktop + hot reload
-pnpm dev           # frontend seul dans le navigateur (mocks)
+cp .env.local.example .env.local
+pnpm tauri:dev      # app desktop
+pnpm tauri:build    # paquet natif
+pnpm dev            # UI navigateur seulement (pas de keychain / Bright Data réel)
 ```
 
-Dans le navigateur, Settings et la recherche d'offres restent en mock. Les
-commandes keychain / Bright Data ne s'activent que dans la fenêtre Tauri.
+## Config
 
-## Scripts
-
-| Script | Rôle |
-| --- | --- |
-| `pnpm dev` | Next.js en mode développement |
-| `pnpm build` | Export statique dans `out/` |
-| `pnpm typecheck` | `tsc --noEmit` |
-| `pnpm lint` | ESLint |
-| `pnpm tauri:dev` | Application desktop (dev) |
-| `pnpm tauri:build` | Bundle natif (release) |
-
-## Pages
-
-| Route | Contenu |
-| --- | --- |
-| `/` | Recherche d'offres, sélection, import d'entreprises |
-| `/entreprise/` | Table, recherche, édition en Sheet |
-| `/contact/` | Table, onglets, édition en Dialog, statut inline |
-| `/templates/` | Grille de modèles, aperçu, copie presse-papiers |
-| `/settings/` | Supabase public, jeton Bright Data, thème |
-
-## Données
-
-Par défaut, `lib/container` branche les repositories **mock**. Pour basculer
-Contact / Entreprise vers Supabase :
+- **Bright Data** : jeton dans Settings → jeton API.
+- **Supabase** : uniquement via `.env.local`. 
 
 ```bash
-# .env.local
-NEXT_PUBLIC_DATA_SOURCE=supabase
-NEXT_PUBLIC_SUPABASE_URL=https://….supabase.co
+NEXT_PUBLIC_SUPABASE_URL=…
 NEXT_PUBLIC_SUPABASE_ANON_KEY=…
+NEXT_PUBLIC_DATA_SOURCE=supabase
 ```
 
-Sans `NEXT_PUBLIC_DATA_SOURCE=supabase`, les URL Supabase seules ne changent
-rien (évite un crash si les tables n'existent pas encore).
+Sans `DATA_SOURCE=supabase` : données d'exemple en mémoire.
+Schéma : exécuter `script.sql` dans Supabase (recreate destructif).
+Rebuild / relance après toute modif des `NEXT_PUBLIC_*`.
 
-## Organisation
+## Sécurité
 
-```
-app/                pages App Router (toutes clientes)
-components/         ui/, layout/, data-table/, domaines
-hooks/              état et cas d'usage
-lib/domain/         types métier
-lib/repositories/   ports + mock / supabase / tauri
-lib/container/      composition des implémentations
-lib/tauri/          invoke typés (secrets, jobs, liens)
-src-tauri/          Rust : secrets, search_jobs, ACL
-docs/               architecture et sécurité
-```
+- Jeton Bright Data = keychain, jamais dans le bundle.
+- Clé anon Supabase = accès total à ta base dans ce mode : ne pas la publier.
 
-N-tier : composant → hook → port → adaptateur. Seul `lib/container` connaît les
-classes concrètes.
-
-## Contraintes export statique
-
-Pas de Route Handler, Middleware, Server Actions, routes dynamiques ni
-optimisation d'images. Les détails s'ouvrent en `Sheet` / `Dialog`. Les liens
-externes passent par `lib/tauri/open-external.ts`.
-
-## Sécurité (résumé)
-
-Aucun secret dans le bundle. Les jetons sensibles sont saisis dans Settings et
-stockés dans le trousseau OS ; Rust les lit pour `search_jobs` sans jamais les
-renvoyer au frontend. Détail : [docs/security.md](docs/security.md).
-
-Architecture : [docs/architecture.md](docs/architecture.md).
-
-## Conventions
-
-Règles dans `.cursor/rules/` (git, commits, TypeScript, Tauri, UI, taille des
-fichiers). Résumé Cursor : `.cursorrules`.
+[docs/security.md](docs/security.md) · [docs/architecture.md](docs/architecture.md)

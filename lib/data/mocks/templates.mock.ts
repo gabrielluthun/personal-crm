@@ -7,11 +7,18 @@ const ts = (iso: string) => ({
   updatedAt: toIsoDateTime(new Date(iso)),
 });
 
+const defaults = {
+  channel: "linkedin",
+  subject: null,
+} as const;
+
+
 export const MOCK_TEMPLATES: readonly MessageTemplate[] = [
   {
-    id: createId("tpl_01"),
+    id: createId("c0000000-0000-4000-8000-000000000001"),
     title: "Icebreaker LinkedIn — offre vue",
     description: "Premier message après une offre WTTJ.",
+    ...defaults,
     body: `Bonjour {{nom_contact}},
 
 J'ai vu le poste {{poste}} chez {{nom_entreprise}} ({{ville}}) et votre parcours m'a interpellé.
@@ -22,9 +29,10 @@ Cordialement`,
     ...ts("2026-01-10T10:00:00.000Z"),
   },
   {
-    id: createId("tpl_02"),
+    id: createId("c0000000-0000-4000-8000-000000000002"),
     title: "Icebreaker — intérêt produit",
     description: "Approche sans offre précise.",
+    ...defaults,
     body: `Bonjour {{nom_contact}},
 
 Je suis impressionné par ce que construit {{nom_entreprise}}. J'aimerais échanger sur vos enjeux produit / tech.
@@ -35,9 +43,10 @@ Merci,`,
     ...ts("2026-01-12T11:00:00.000Z"),
   },
   {
-    id: createId("tpl_03"),
+    id: createId("c0000000-0000-4000-8000-000000000003"),
     title: "Relance douce",
     description: "Relance 1 après silence.",
+    ...defaults,
     body: `Bonjour {{nom_contact}},
 
 Je me permets de revenir vers vous concernant {{nom_entreprise}}.
@@ -48,9 +57,10 @@ Bonne journée,`,
     ...ts("2026-01-15T09:00:00.000Z"),
   },
   {
-    id: createId("tpl_04"),
+    id: createId("c0000000-0000-4000-8000-000000000004"),
     title: "Relance avec valeur",
     description: "Relance 2 avec un angle concret.",
+    ...defaults,
     body: `Bonjour {{nom_contact}},
 
 En préparant mon approche sur {{nom_entreprise}}, j'ai noté quelques pistes liées à {{poste}}.
@@ -61,9 +71,10 @@ Si utile, je peux vous les partager en 10 minutes.
     ...ts("2026-01-18T14:00:00.000Z"),
   },
   {
-    id: createId("tpl_05"),
+    id: createId("c0000000-0000-4000-8000-000000000005"),
     title: "Demande d'intro",
     description: "Demande de mise en relation.",
+    ...defaults,
     body: `Bonjour {{nom_contact}},
 
 Je cible {{nom_entreprise}} pour un rôle {{poste}} à {{ville}}.
@@ -74,9 +85,10 @@ Merci beaucoup,`,
     ...ts("2026-01-20T16:00:00.000Z"),
   },
   {
-    id: createId("tpl_06"),
+    id: createId("c0000000-0000-4000-8000-000000000006"),
     title: "Confirmation call",
     description: "Message avant un call prévu.",
+    ...defaults,
     body: `Bonjour {{nom_contact}},
 
 Confirmant notre échange au sujet de {{poste}} chez {{nom_entreprise}}.
