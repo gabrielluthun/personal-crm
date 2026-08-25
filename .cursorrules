@@ -1,0 +1,63 @@
+# Personal CRM — règles projet
+
+Application de bureau Tauri v2 + Next.js (App Router, export statique) pour la
+prospection et la recherche d'emploi. Ce fichier est le format historique lu par
+Cursor. La source de vérité détaillée vit dans `.cursor/rules/*.mdc`.
+
+## Git
+
+- `main` est la production, on n'y committe jamais directement.
+- `develop` est la branche d'intégration. On branche depuis elle, on y remerge.
+- Une fonctionnalité = une branche `feat/<nom>`, `fix/<nom>` ou `chore/<nom>`.
+- Un fichier modifié = un commit. On stage le fichier exact, on committe, puis
+  on passe au suivant.
+- Messages en anglais, Conventional Commits : `<type>(<scope>): <résumé>`.
+- Types autorisés : feat, fix, docs, style, refactor, perf, test, chore, ci.
+
+## TypeScript
+
+- `strict` activé, `any` interdit, `unknown` + rétrécissement de type sinon.
+- Aucun export par défaut hors des fichiers imposés par Next (`page.tsx`,
+  `layout.tsx`).
+- Les types du domaine vivent dans `lib/domain`, jamais dupliqués ailleurs.
+- Les valeurs littérales métier (statuts, libellés) ont une source unique.
+
+## Architecture
+
+- Découpage N-tier strict :
+  - présentation : `app/`, `components/`
+  - métier : `hooks/`, `lib/services/`
+  - accès données : `lib/repositories/`, `lib/supabase/`
+- Un composant n'appelle jamais un repository directement, il passe par un hook.
+- Les repositories implémentent les ports de `lib/repositories/ports`.
+- `lib/container` est le seul endroit qui connaît les implémentations concrètes.
+
+## Taille des fichiers
+
+- 200 lignes maximum par fichier, cible 150.
+- Au-delà, on scinde par responsabilité (colonnes, formulaire, dialog, hook).
+
+## Contraintes Tauri + export statique
+
+- `output: 'export'` : pas de Route Handler, pas de Middleware, pas de Server
+  Action, pas d'optimisation d'images.
+- Toutes les pages sont clientes, les vues détail passent par `Sheet`/`Dialog`.
+- Pas de route dynamique : aucune page ne dépend de `generateStaticParams`.
+- Les liens externes s'ouvrent via `lib/tauri/open-external.ts`, jamais avec
+  `target="_blank"` dans la webview.
+
+## Sécurité
+
+- Aucun secret dans le bundle client. Tout `NEXT_PUBLIC_*` est public par
+  construction et lisible dans l'application packagée.
+- Les jetons sensibles sont saisis à l'exécution et stockés dans le trousseau
+  du système via les commandes Rust de `src-tauri/src/secrets.rs`.
+- Aucune commande Tauri ne renvoie la valeur d'un secret au frontend.
+- Les capacités Tauri sont explicites et minimales dans
+  `src-tauri/capabilities/`.
+
+## UI
+
+- shadcn/ui + Tailwind CSS v4, icônes Lucide.
+- Libellés de l'interface en français, code et commits en anglais.
+- Accessibilité : tout contrôle interactif a un nom accessible.
