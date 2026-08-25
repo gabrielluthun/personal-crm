@@ -1,4 +1,6 @@
 mod error;
+mod job_search;
+mod models;
 mod secrets;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -9,6 +11,7 @@ pub fn run() {
       secrets::set_secret,
       secrets::has_secret,
       secrets::delete_secret,
+      job_search::search_jobs,
     ])
     .setup(|app| {
       if cfg!(debug_assertions) {
