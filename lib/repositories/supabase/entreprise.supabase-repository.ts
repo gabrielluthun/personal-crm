@@ -8,7 +8,6 @@ import {
   notFoundError,
   repositoryError,
 } from "@/lib/domain/shared/errors";
-import { generateId } from "@/lib/domain/shared/id";
 import { err, ok } from "@/lib/domain/shared/result";
 import {
   createTimestamps,
@@ -23,11 +22,12 @@ import {
   getSupabaseClient,
   type AppSupabaseClient,
 } from "@/lib/supabase/client";
-import { containsPattern } from "@/lib/supabase/filters";
+import { containsFilterValue } from "@/lib/supabase/filters";
 import {
+  mapEntrepriseInsert,
   mapEntrepriseRow,
-  mapEntrepriseToInsert,
 } from "@/lib/supabase/mappers";
+import { interpretDeleteCount } from "@/lib/repositories/supabase/interpret-delete-count";
 
 export class SupabaseEntrepriseRepository implements EntreprisePort {
   constructor(private readonly client: AppSupabaseClient = getSupabaseClient()) {}
@@ -40,7 +40,8 @@ export class SupabaseEntrepriseRepository implements EntreprisePort {
       .from("entreprises")
       .select("*", { count: "exact" });
     if (query.search?.trim()) {
-      builder = builder.ilike("name", containsPattern(query.search.trim()));
+      const term = containsFilterValue(query.search.trim());
+      builder = builder.or(`name.ilike.${term},location.ilike.${term}`);
     }
     const sort = query.sort ?? { field: "name", direction: "asc" };
     const column =
@@ -81,18 +82,22 @@ export class SupabaseEntrepriseRepository implements EntreprisePort {
 
   async create(input: EntrepriseCreateInput) {
     const timestamps = createTimestamps();
-    const entity: Entreprise = {
-      id: generateId<"Entreprise">("ent"),
-      name: input.name.trim(),
-      linkedinUrl: input.linkedinUrl ?? null,
-      websiteUrl: input.websiteUrl ?? null,
-      wttjUrl: input.wttjUrl ?? null,
-      notes: input.notes ?? null,
-      ...timestamps,
-    };
     const { data, error } = await this.client
       .from("entreprises")
-      .insert(mapEntrepriseToInsert(entity))
+      .insert(
+        mapEntrepriseInsert({
+          name: input.name.trim(),
+          linkedinUrl: input.linkedinUrl ?? null,
+          websiteUrl: input.websiteUrl ?? null,
+          wttjUrl: input.wttjUrl ?? null,
+          location: input.location ?? null,
+          targetOfferUrl: input.targetOfferUrl ?? null,
+          notes: input.notes ?? null,
+          rawData: input.rawData ?? null,
+          scrapedAt: input.scrapedAt ?? null,
+          ...timestamps,
+        }),
+      )
       .select("*")
       .single();
     if (error) {
@@ -119,12 +124,24 @@ export class SupabaseEntrepriseRepository implements EntreprisePort {
           : input.websiteUrl,
       wttjUrl:
         input.wttjUrl === undefined ? current.value.wttjUrl : input.wttjUrl,
+      location:
+        input.location === undefined ? current.value.location : input.location,
+      targetOfferUrl:
+        input.targetOfferUrl === undefined
+          ? current.value.targetOfferUrl
+          : input.targetOfferUrl,
       notes: input.notes === undefined ? current.value.notes : input.notes,
+      rawData:
+        input.rawData === undefined ? current.value.rawData : input.rawData,
+      scrapedAt:
+        input.scrapedAt === undefined
+          ? current.value.scrapedAt
+          : input.scrapedAt,
       ...touchUpdatedAt(current.value),
     };
     const { data, error } = await this.client
       .from("entreprises")
-      .update(mapEntrepriseToInsert(updated))
+      .update(mapEntrepriseInsert(updated))
       .eq("id", id)
       .select("*")
       .single();
@@ -152,13 +169,13 @@ export class SupabaseEntrepriseRepository implements EntreprisePort {
     if (ids.length === 0) {
       return ok(undefined);
     }
-    const { error } = await this.client
+    const { error, count } = await this.client
       .from("entreprises")
-      .delete()
+      .delete({ count: "exact" })
       .in("id", [...ids]);
     if (error) {
       return err(repositoryError(error.message, error));
     }
-    return ok(undefined);
+    return interpretDeleteCount(count, ids.length, "entreprises");
   }
 }
