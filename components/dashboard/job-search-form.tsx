@@ -1,46 +1,25 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { SearchIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import type {
-  JobContractType,
-  JobSearchQuery,
-} from "@/lib/domain/job-offer";
-
-const CONTRACT_TYPES: readonly JobContractType[] = [
-  "CDI",
-  "CDD",
-  "Freelance",
-  "Stage",
-  "Alternance",
-  "Autre",
-];
-
-const ANY_CONTRACT = "__any__";
+import type { JobSearchQuery } from "@/lib/domain/job-offer";
 
 type JobSearchFormProps = {
   readonly isLoading?: boolean;
+  readonly statusText?: string | null;
   readonly onSubmit: (query: JobSearchQuery) => void;
 };
 
 export function JobSearchForm({
   isLoading = false,
+  statusText = null,
   onSubmit,
 }: JobSearchFormProps) {
-  const [keywords, setKeywords] = useState("");
   const [location, setLocation] = useState("");
-  const [contractType, setContractType] = useState<string>(ANY_CONTRACT);
+  const [keywords, setKeywords] = useState("");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -51,82 +30,61 @@ export function JobSearchForm({
     onSubmit({
       keywords: trimmedKeywords,
       location: location.trim() || undefined,
-      contractType:
-        contractType === ANY_CONTRACT
-          ? null
-          : (contractType as JobContractType),
+      contractType: null,
     });
   }
 
   return (
     <form
-      className="grid gap-3 rounded-xl border border-border p-4 sm:grid-cols-2 lg:grid-cols-4"
+      className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 sm:p-5"
       onSubmit={handleSubmit}
+      aria-labelledby="recherche-entreprises-title"
     >
-      <div className="flex flex-col gap-1.5 sm:col-span-2 lg:col-span-1">
-        <Label htmlFor="job-keywords">Mots-clés</Label>
-        <Input
-          id="job-keywords"
-          value={keywords}
-          required
-          placeholder="ex. React, TypeScript…"
-          disabled={isLoading}
-          onChange={(event) => {
-            setKeywords(event.target.value);
-          }}
-        />
+      <h2
+        id="recherche-entreprises-title"
+        className="text-base font-semibold text-foreground"
+      >
+        Recherche entreprises
+      </h2>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="job-location">Ville</Label>
+          <Input
+            id="job-location"
+            value={location}
+            placeholder="ex. Paris"
+            disabled={isLoading}
+            onChange={(event) => {
+              setLocation(event.target.value);
+            }}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="job-keywords">Domaine / type de poste</Label>
+          <Input
+            id="job-keywords"
+            value={keywords}
+            required
+            placeholder="ex. développeur web"
+            disabled={isLoading}
+            onChange={(event) => {
+              setKeywords(event.target.value);
+            }}
+          />
+        </div>
       </div>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="job-location">Localisation</Label>
-        <Input
-          id="job-location"
-          value={location}
-          placeholder="ex. Paris"
-          disabled={isLoading}
-          onChange={(event) => {
-            setLocation(event.target.value);
-          }}
-        />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="job-contract">Contrat</Label>
-        <Select
-          value={contractType}
-          disabled={isLoading}
-          onValueChange={(value) => {
-            if (typeof value === "string") {
-              setContractType(value);
-            }
-          }}
-        >
-          <SelectTrigger id="job-contract" className="w-full">
-            <SelectValue placeholder="Tous">
-              {(selected) =>
-                selected === ANY_CONTRACT || selected === null
-                  ? "Tous les contrats"
-                  : String(selected)
-              }
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ANY_CONTRACT}>Tous les contrats</SelectItem>
-            {CONTRACT_TYPES.map((type) => (
-              <SelectItem key={type} value={type}>
-                {type}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="flex items-end">
+      <div className="flex flex-wrap items-center gap-3">
         <Button
           type="submit"
-          className="w-full"
           disabled={isLoading || keywords.trim().length === 0}
         >
-          <SearchIcon data-icon="inline-start" />
-          {isLoading ? "Recherche…" : "Rechercher"}
+          {isLoading ? "Recherche…" : "Valider"}
         </Button>
+        {statusText ? (
+          <p className="text-sm text-muted-foreground" role="status">
+            {statusText}
+          </p>
+        ) : null}
       </div>
     </form>
   );
