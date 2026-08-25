@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import type {
   Contact,
+  ContactCalendarDate,
   ContactCreateInput,
   ContactId,
   ContactUpdateInput,
@@ -22,11 +23,14 @@ export type ContactFormValues = {
   readonly lastName: string;
   readonly email: string;
   readonly linkedinUrl: string;
+  readonly phone: string;
+  readonly whatsapp: string;
   readonly jobTitle: string;
   readonly headline: string;
   readonly status: ContactStatus;
   readonly entrepriseId: EntrepriseId | null;
   readonly notes: string;
+  readonly lastMessageSentAt: ContactCalendarDate | "";
 };
 
 export type ContactFormErrors = {
@@ -53,11 +57,14 @@ const EMPTY_VALUES: ContactFormValues = {
   lastName: "",
   email: "",
   linkedinUrl: "",
+  phone: "",
+  whatsapp: "",
   jobTitle: "",
   headline: "",
   status: "À contacter",
   entrepriseId: null,
   notes: "",
+  lastMessageSentAt: "",
 };
 
 export function useContactForm({
@@ -136,11 +143,14 @@ function toFormValues(contact: Contact | null): ContactFormValues {
     lastName: contact.lastName,
     email: contact.email ?? "",
     linkedinUrl: contact.linkedinUrl ?? "",
+    phone: contact.phone ?? "",
+    whatsapp: contact.whatsapp ?? "",
     jobTitle: contact.jobTitle ?? "",
     headline: contact.headline ?? "",
     status: contact.status,
     entrepriseId: contact.entrepriseId,
     notes: contact.notes ?? "",
+    lastMessageSentAt: contact.lastMessageSentAt ?? "",
   };
 }
 
@@ -150,11 +160,17 @@ function toSubmitInput(values: ContactFormValues): ContactCreateInput {
     lastName: values.lastName.trim(),
     email: emptyToNull(values.email),
     linkedinUrl: emptyToNull(values.linkedinUrl),
+    phone: emptyToNull(values.phone),
+    whatsapp: emptyToNull(values.whatsapp),
     jobTitle: emptyToNull(values.jobTitle),
     headline: emptyToNull(values.headline),
     status: values.status,
     entrepriseId: values.entrepriseId,
     notes: emptyToNull(values.notes),
+    lastMessageSentAt:
+      values.lastMessageSentAt.trim().length === 0
+        ? null
+        : values.lastMessageSentAt,
   };
 }
 
