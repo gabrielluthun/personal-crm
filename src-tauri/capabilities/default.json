@@ -10,6 +10,7 @@
       "allow": [{ "url": "https://*" }, { "url": "mailto:*" }]
     },
     "allow-secret-commands",
-    "allow-job-search"
+    "allow-job-search",
+    "allow-bright-data-probe"
   ]
 }
