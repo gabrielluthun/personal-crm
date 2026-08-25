@@ -58,7 +58,7 @@ Définis dans `lib/repositories/ports/` :
 | `ContactPort` | CRUD + filtre par entreprise / statut |
 | `JobSearchPort` | Recherche d'offres |
 | `TemplatePort` | Lecture des modèles |
-| `SettingsPort` | Présence / écriture secrets + settings publics |
+| `SettingsPort` | Présence / écriture du jeton Bright Data (keychain) |
 
 Les adaptateurs mock, Supabase et Tauri implémentent ces ports. Ajouter une
 source = nouvel adaptateur + une branche dans `createRepositories`.
@@ -111,20 +111,21 @@ nom / URLs de l'offre.
 
 ## Migration vers Supabase
 
-1. Créer les tables alignées sur `lib/supabase/database.types.ts`.
-2. Activer RLS ; n'exposer que la clé `anon` côté client.
-3. Renseigner `.env.local` (URL + anon).
-4. `NEXT_PUBLIC_DATA_SOURCE=supabase`.
-5. Vérifier Contact / Entreprise ; Templates et JobSearch restent mock / Tauri.
+1. Exécuter `script.sql` (DROP + recreate UUID / Bright Data, **sans Auth**).
+2. Renseigner `.env.local` (URL + anon) et `NEXT_PUBLIC_DATA_SOURCE=supabase`.
+3. Rebuild — les `NEXT_PUBLIC_*` sont inlinés au build.
+4. Pas de login : la clé anon ouvre le CRUD (RLS `anon` ouverte). Ne pas
+   publier la clé.
 
-Les mappers dans `lib/supabase/mappers.ts` convertissent les lignes SQL vers
-les types domaine.
+Les inserts omettent `id` : Postgres applique `gen_random_uuid()`.
+Les mappers dans `lib/supabase/mappers.ts` convertissent les lignes.
 
-## Limites MVP connues
+## Limites connues
 
-- `search_jobs` ne fait pas encore d'appel HTTP Bright Data (fixtures filtrées).
-- Templates et Settings publics (URL Supabase) ne sont pas persistés côté cloud.
-- Pas de sync multi-appareils hors Supabase opt-in.
+- `search_jobs` : fixtures MVP jusqu'à l'HTTP Bright Data côté Rust.
+- `raw_data` / `scraped_at` prêts pour l'ingestion scrape, pas encore peuplés
+  automatiquement.
+- Single-user : pas d'isolation multi-comptes (volontaire).
 
 ## Taille des fichiers
 
