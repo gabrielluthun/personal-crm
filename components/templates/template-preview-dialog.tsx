@@ -28,10 +28,15 @@ import {
 } from "@/lib/services/template-renderer";
 
 const SAMPLE_VALUES: TemplateVariableValues = {
-  nom_entreprise: "Alan",
-  nom_contact: "Camille Dupont",
-  poste: "Développeur Full-Stack",
-  ville: "Paris",
+  first_name: "Camille",
+  last_name: "Dupont",
+  company_name: "Alan",
+  email: "camille.dupont@alan.eu",
+  role: "Développeur Full-Stack",
+  linkedin: "https://www.linkedin.com/in/camille-dupont",
+  status: "En discussion",
+  first_contact_date: "2026-01-10",
+  next_follow_up: "2026-01-17",
 };
 
 type TemplatePreviewDialogProps = {
@@ -54,9 +59,7 @@ export function TemplatePreviewDialog({
   }
 
   const result =
-    template === null
-      ? null
-      : renderTemplate(template.body, values);
+    template === null ? null : renderTemplate(template.body, values);
 
   async function handleCopy(): Promise<void> {
     if (result === null) {
@@ -104,7 +107,10 @@ export function TemplatePreviewDialog({
         {result !== null ? (
           <div className="flex flex-col gap-2">
             {result.missing.length > 0 ? (
-              <p role="status" className="text-xs text-amber-700 dark:text-amber-400">
+              <p
+                role="status"
+                className="text-xs text-amber-700 dark:text-amber-400"
+              >
                 Variables manquantes : {formatMissingVariables(result.missing)}
               </p>
             ) : null}

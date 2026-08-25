@@ -1,25 +1,39 @@
 /**
  * Single source of truth for message template placeholders.
  * Never duplicate these literals — import from here.
+ *
+ * Chip labels are French; tokens inserted in subject/body are English keys.
+ * `{{linkedin}}` is the contact's stored LinkedIn URL (manual / SERP),
+ * not a Bright Data social enrichment.
  */
 
 export const TEMPLATE_VARIABLES = [
-  "nom_entreprise",
-  "nom_contact",
-  "poste",
-  "ville",
+  "first_name",
+  "last_name",
+  "company_name",
+  "email",
+  "role",
+  "linkedin",
+  "status",
+  "first_contact_date",
+  "next_follow_up",
 ] as const;
 
 export type TemplateVariableKey = (typeof TEMPLATE_VARIABLES)[number];
 
 export const TEMPLATE_VARIABLE_LABELS: Record<TemplateVariableKey, string> = {
-  nom_entreprise: "Nom de l'entreprise",
-  nom_contact: "Nom du contact",
-  poste: "Poste",
-  ville: "Ville",
+  first_name: "Prénom",
+  last_name: "Nom",
+  company_name: "Entreprise",
+  email: "Email",
+  role: "Role",
+  linkedin: "LinkedIn",
+  status: "Statut",
+  first_contact_date: "Date 1er contact",
+  next_follow_up: "Prochaine relance",
 };
 
-/** Placeholder token as it appears in template bodies, e.g. `{{poste}}`. */
+/** Placeholder token as it appears in template bodies, e.g. `{{first_name}}`. */
 export function templateVariableToken(key: TemplateVariableKey): string {
   return `{{${key}}}`;
 }
