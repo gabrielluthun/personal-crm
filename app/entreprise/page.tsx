@@ -4,7 +4,11 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { EntrepriseEditSheet } from "@/components/entreprise/entreprise-edit-sheet";
-import { EntrepriseTable } from "@/components/entreprise/entreprise-table";
+import type { EntrepriseUrlFilters } from "@/components/entreprise/entreprise-columns";
+import {
+  countFilteredEntreprises,
+  EntrepriseTable,
+} from "@/components/entreprise/entreprise-table";
 import { EntrepriseToolbar } from "@/components/entreprise/entreprise-toolbar";
 import { PageHeader } from "@/components/layout/page-header";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -12,10 +16,15 @@ import { useEntreprises } from "@/hooks/use-entreprises";
 import { useRowSelection } from "@/hooks/use-row-selection";
 import type { Entreprise, EntrepriseId } from "@/lib/domain/entreprise";
 
+const DEFAULT_URL_FILTERS: EntrepriseUrlFilters = {
+  linkedin: "all",
+  website: "all",
+  wttj: "all",
+};
+
 export default function EntreprisePage() {
   const {
     items,
-    total,
     search,
     setSearch,
     isLoading,
@@ -28,11 +37,14 @@ export default function EntreprisePage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [urlFilters, setUrlFilters] =
+    useState<EntrepriseUrlFilters>(DEFAULT_URL_FILTERS);
   const [activeEntreprise, setActiveEntreprise] = useState<Entreprise | null>(
     null,
   );
 
   const selectedCount = selection.selectedCount;
+  const visibleCount = countFilteredEntreprises(items, urlFilters);
 
   async function executeDelete(): Promise<void> {
     const ids = [...selection.selectedIds];
@@ -103,11 +115,13 @@ export default function EntreprisePage() {
             items={items}
             isLoading={isLoading}
             selection={selection}
+            urlFilters={urlFilters}
+            onUrlFiltersChange={setUrlFilters}
             onRowClick={handleRowClick}
           />
         </div>
         <p className="text-sm text-muted-foreground">
-          {total} entreprise{total === 1 ? "" : "s"}
+          {visibleCount} ligne{visibleCount === 1 ? "" : "s"}
         </p>
       </div>
 
