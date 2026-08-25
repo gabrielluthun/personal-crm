@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { createContactColumns } from "@/components/contact/contact-columns";
+import {
+  createContactColumns,
+  filterContactsByListFilters,
+  type ContactListFilters,
+} from "@/components/contact/contact-columns";
 import { DataTable } from "@/components/data-table/data-table";
 import type { RowSelection } from "@/hooks/use-row-selection";
 import type {
@@ -20,6 +24,8 @@ type ContactTableProps = {
   readonly items: readonly Contact[];
   readonly isLoading: boolean;
   readonly selection: RowSelection<ContactId>;
+  readonly listFilters: ContactListFilters;
+  readonly onListFiltersChange: (next: ContactListFilters) => void;
   readonly onRowClick: (contact: Contact) => void;
   readonly onUpdate: (
     id: ContactId,
@@ -31,11 +37,14 @@ export function ContactTable({
   items,
   isLoading,
   selection,
+  listFilters,
+  onListFiltersChange,
   onRowClick,
   onUpdate,
 }: ContactTableProps) {
   const [updatingId, setUpdatingId] = useState<ContactId | null>(null);
-  const visibleIds = items.map((item) => item.id);
+  const visibleItems = filterContactsByListFilters(items, listFilters);
+  const visibleIds = visibleItems.map((item) => item.id);
 
   async function patch(
     id: ContactId,
@@ -57,6 +66,8 @@ export function ContactTable({
     onToggleAll: () => {
       selection.toggleAll(visibleIds);
     },
+    listFilters,
+    onListFiltersChange,
     onStatusChange: (id: ContactId, status: ContactStatus) => {
       void patch(id, { status });
     },
@@ -71,7 +82,7 @@ export function ContactTable({
   return (
     <DataTable
       columns={columns}
-      rows={items}
+      rows={visibleItems}
       getRowId={(row) => row.id}
       isLoading={isLoading}
       selectedIds={selection.selectedIds}
@@ -80,4 +91,11 @@ export function ContactTable({
       emptyDescription="Ajoutez un contact ou changez d'onglet / de recherche."
     />
   );
+}
+
+export function countFilteredContacts(
+  items: readonly Contact[],
+  listFilters: ContactListFilters,
+): number {
+  return filterContactsByListFilters(items, listFilters).length;
 }

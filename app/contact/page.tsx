@@ -3,8 +3,12 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { ContactEditDialog } from "@/components/contact/contact-edit-dialog";
-import { ContactTable } from "@/components/contact/contact-table";
+import type { ContactListFilters } from "@/components/contact/contact-columns";
+import { ContactEditSheet } from "@/components/contact/contact-edit-sheet";
+import {
+  ContactTable,
+  countFilteredContacts,
+} from "@/components/contact/contact-table";
 import { ContactTabs } from "@/components/contact/contact-tabs";
 import { ContactToolbar } from "@/components/contact/contact-toolbar";
 import { PageHeader } from "@/components/layout/page-header";
@@ -13,10 +17,13 @@ import { useContacts } from "@/hooks/use-contacts";
 import { useRowSelection } from "@/hooks/use-row-selection";
 import type { Contact, ContactId } from "@/lib/domain/contact";
 
+const DEFAULT_LIST_FILTERS: ContactListFilters = {
+  entreprise: "all",
+};
+
 export default function ContactPage() {
   const {
     items,
-    total,
     search,
     setSearch,
     tab,
@@ -30,10 +37,13 @@ export default function ContactPage() {
   const selection = useRowSelection<ContactId>();
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [listFilters, setListFilters] =
+    useState<ContactListFilters>(DEFAULT_LIST_FILTERS);
   const [activeContact, setActiveContact] = useState<Contact | null>(null);
 
   const selectedCount = selection.selectedCount;
+  const visibleCount = countFilteredContacts(items, listFilters);
 
   async function executeDelete(): Promise<void> {
     const ids = [...selection.selectedIds];
@@ -57,7 +67,7 @@ export default function ContactPage() {
       ids.some((id) => id === activeContact.id)
     ) {
       setActiveContact(null);
-      setDialogOpen(false);
+      setSheetOpen(false);
     }
     selection.clear();
     toast.success(
@@ -69,12 +79,12 @@ export default function ContactPage() {
 
   function handleCreate(): void {
     setActiveContact(null);
-    setDialogOpen(true);
+    setSheetOpen(true);
   }
 
   function handleRowClick(contact: Contact): void {
     setActiveContact(contact);
-    setDialogOpen(true);
+    setSheetOpen(true);
   }
 
   return (
@@ -86,16 +96,18 @@ export default function ContactPage() {
       <div className="flex min-h-0 flex-1 flex-col gap-4 px-4 py-4 sm:px-6 md:px-8">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <ContactTabs value={tab} onValueChange={setTab} />
-          <ContactToolbar
-            search={search}
-            onSearchChange={setSearch}
-            selectedCount={selectedCount}
-            isDeleting={isDeleting}
-            onCreate={handleCreate}
-            onDeleteSelected={() => {
-              setConfirmOpen(true);
-            }}
-          />
+          <div className="min-w-0 flex-1">
+            <ContactToolbar
+              search={search}
+              onSearchChange={setSearch}
+              selectedCount={selectedCount}
+              isDeleting={isDeleting}
+              onCreate={handleCreate}
+              onDeleteSelected={() => {
+                setConfirmOpen(true);
+              }}
+            />
+          </div>
         </div>
         {error !== null ? (
           <p role="alert" className="text-sm text-destructive">
@@ -107,19 +119,21 @@ export default function ContactPage() {
             items={items}
             isLoading={isLoading}
             selection={selection}
+            listFilters={listFilters}
+            onListFiltersChange={setListFilters}
             onRowClick={handleRowClick}
             onUpdate={update}
           />
         </div>
         <p className="text-sm text-muted-foreground">
-          {total} contact{total === 1 ? "" : "s"}
+          {visibleCount} ligne{visibleCount === 1 ? "" : "s"}
         </p>
       </div>
 
-      <ContactEditDialog
-        open={dialogOpen}
+      <ContactEditSheet
+        open={sheetOpen}
         contact={activeContact}
-        onOpenChange={setDialogOpen}
+        onOpenChange={setSheetOpen}
         onCreate={create}
         onUpdate={update}
       />

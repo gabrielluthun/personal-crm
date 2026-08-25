@@ -5,13 +5,13 @@ import { toast } from "sonner";
 import { ContactForm } from "@/components/contact/contact-form";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { useContactForm } from "@/hooks/use-contact-form";
 import type {
   Contact,
@@ -22,7 +22,7 @@ import type {
 import type { DomainError } from "@/lib/domain/shared/errors";
 import type { Result } from "@/lib/domain/shared/result";
 
-type ContactEditDialogProps = {
+type ContactEditSheetProps = {
   readonly open: boolean;
   readonly contact: Contact | null;
   readonly onOpenChange: (open: boolean) => void;
@@ -35,13 +35,13 @@ type ContactEditDialogProps = {
   ) => Promise<Result<Contact, DomainError>>;
 };
 
-export function ContactEditDialog({
+export function ContactEditSheet({
   open,
   contact,
   onOpenChange,
   onCreate,
   onUpdate,
-}: ContactEditDialogProps) {
+}: ContactEditSheetProps) {
   const form = useContactForm({
     contact,
     onCreate,
@@ -55,33 +55,39 @@ export function ContactEditDialog({
   });
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg" showCloseButton>
-        <DialogHeader>
-          <DialogTitle>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className="w-full gap-0 sm:max-w-lg"
+        showCloseButton
+      >
+        <SheetHeader className="border-b border-border">
+          <SheetTitle>
             {form.isEditing ? "Édition du contact" : "Nouveau contact"}
-          </DialogTitle>
-          <DialogDescription>
+          </SheetTitle>
+          <SheetDescription>
             {form.isEditing
               ? "Modifiez les informations du contact."
               : "Renseignez les informations du nouveau contact."}
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
-        <ContactForm
-          values={form.values}
-          fieldErrors={form.fieldErrors}
-          disabled={form.isSubmitting}
-          onChange={form.setField}
-        />
+        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4">
+          <ContactForm
+            values={form.values}
+            fieldErrors={form.fieldErrors}
+            disabled={form.isSubmitting}
+            onChange={form.setField}
+          />
 
-        {form.submitError !== null ? (
-          <p role="alert" className="text-sm text-destructive">
-            {form.submitError}
-          </p>
-        ) : null}
+          {form.submitError !== null ? (
+            <p role="alert" className="text-sm text-destructive">
+              {form.submitError}
+            </p>
+          ) : null}
+        </div>
 
-        <DialogFooter>
+        <SheetFooter className="border-t border-border sm:flex-row sm:justify-end">
           <Button
             type="button"
             variant="outline"
@@ -101,8 +107,8 @@ export function ContactEditDialog({
           >
             {form.isSubmitting ? "Enregistrement…" : "Enregistrer"}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }

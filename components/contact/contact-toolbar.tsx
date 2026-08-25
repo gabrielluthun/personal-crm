@@ -28,6 +28,8 @@ export function ContactToolbar({
       onSearchChange={onSearchChange}
       searchPlaceholder="Rechercher un contact…"
       searchLabel="Rechercher un contact"
+      searchWrapperClassName="max-w-none flex-1"
+      className="gap-3 sm:items-center"
       actions={
         <>
           {selectedCount > 0 ? (
