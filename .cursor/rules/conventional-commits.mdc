@@ -1,0 +1,43 @@
+---
+description: Conventional Commits en anglais pour tout l'historique git
+alwaysApply: true
+---
+
+# Messages de commit
+
+Format obligatoire, en anglais :
+
+```
+<type>(<scope facultatif>): <résumé à l'impératif>
+```
+
+## Types autorisés
+
+`feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`.
+
+## Règles
+
+- Impératif présent : `add`, `fix`, `remove`, jamais `added` ni `adding`.
+- Sujet d'environ 50 caractères, 72 au maximum.
+- Pas de point final sur la ligne de sujet.
+- Le scope reflète la zone touchée : `tauri`, `contact`, `entreprise`,
+  `dashboard`, `templates`, `settings`, `domain`, `ui`, `deps`.
+- Le corps explique le **pourquoi** quand ce n'est pas évident, pas le quoi.
+- Jamais de message en français.
+
+## Exemples
+
+```
+# À proscrire
+Ajout de la table des contacts
+update files
+feat: added contact table and fixed badge colors
+
+# Correct
+feat(contact): add data table with inline status editing
+fix(entreprise): keep sheet state when the row list refreshes
+chore(deps): add keyring crate for os keychain access
+```
+
+Un commit ne contient qu'un seul fichier modifié. Si un changement touche
+plusieurs fichiers, il produit plusieurs commits successifs.

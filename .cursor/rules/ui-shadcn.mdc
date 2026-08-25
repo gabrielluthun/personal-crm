@@ -1,0 +1,47 @@
+---
+description: Conventions d'interface shadcn/ui, Tailwind v4 et accessibilité
+globs: ["app/**/*.tsx", "components/**/*.tsx"]
+alwaysApply: false
+---
+
+# Interface
+
+## shadcn/ui
+
+- Les primitives vivent dans `components/ui/` et sont ajoutées par le CLI
+  (`pnpm dlx shadcn@latest add <composant>`). On ne les écrit pas à la main.
+- On ne modifie un fichier de `components/ui/` que pour une raison documentée :
+  le CLI l'écraserait lors d'une mise à jour.
+- Les composants métier vivent dans `components/<domaine>/` et composent les
+  primitives, ils ne les remplacent pas.
+
+## Tailwind v4
+
+- Le thème est défini par des variables CSS dans `app/globals.css` avec
+  `@theme inline`. Pas de `tailwind.config.js`.
+- On utilise les tokens sémantiques (`bg-background`, `text-muted-foreground`,
+  `border-border`), jamais une couleur brute comme `bg-zinc-900`.
+- Les classes conditionnelles passent par `cn()` de `lib/utils.ts`.
+
+## Structure des composants
+
+- Un composant par fichier, nommé comme son fichier.
+- Les props sont un type exporté `type XProps = { ... }`.
+- Pas de logique d'accès aux données : un composant reçoit ses données en props
+  ou via un hook de `hooks/`.
+- L'état de formulaire vit dans un hook `use-*-form.ts`, pas dans le JSX.
+
+## Accessibilité
+
+- Tout contrôle interactif a un nom accessible : `<Label htmlFor>` ou
+  `aria-label` pour les boutons à icône seule.
+- Les icônes décoratives portent `aria-hidden="true"`.
+- Une ligne de table cliquable expose aussi une cible clavier explicite.
+- Les cases à cocher de sélection annoncent leur portée
+  (`aria-label="Tout sélectionner"`).
+
+## Langue
+
+- Les libellés visibles sont en français, accents inclus : « À contacter »,
+  « Relance 1 », « Terminé ».
+- Le code, les noms de props et les commentaires restent en anglais.

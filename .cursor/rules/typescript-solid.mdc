@@ -1,0 +1,66 @@
+---
+description: Conventions TypeScript strictes et principes SOLID appliqués au découpage N-tier
+globs: ["**/*.ts", "**/*.tsx"]
+alwaysApply: false
+---
+
+# TypeScript et SOLID
+
+## Typage
+
+- `strict` est activé et ne se contourne pas.
+- `any` est interdit. Utiliser `unknown` puis rétrécir, ou un type précis.
+- Pas de `as` sauf pour un type nominal (`Id<T>`) ou une assertion `as const`.
+- Pas de `!` non-null assertion : on gère l'absence explicitement.
+- Les fonctions exportées ont un type de retour explicite.
+- Les objets de données sont `readonly` par défaut.
+
+## Exports
+
+- Pas d'export par défaut, sauf là où Next l'impose : `page.tsx`, `layout.tsx`,
+  `error.tsx`, `not-found.tsx`, `next.config.ts`.
+- Un fichier exporte un symbole principal dont il porte le nom.
+
+## Découpage N-tier
+
+```
+app/, components/        présentation, aucune logique d'accès aux données
+hooks/, lib/services/    logique métier, orchestration, état
+lib/repositories/ports/  contrats (interfaces)
+lib/repositories/*/      implémentations (mock, supabase, tauri)
+lib/domain/              types et invariants métier
+```
+
+Règles de dépendance :
+
+- Un composant n'importe jamais un repository ni le client Supabase.
+- Un composant passe toujours par un hook de `hooks/`.
+- Un hook dépend d'un **port**, jamais d'une implémentation concrète.
+- `lib/container/` est le seul module qui instancie des implémentations.
+- `lib/domain/` ne dépend de rien d'autre que de lui-même.
+
+## SOLID
+
+- **S** : un fichier, une responsabilité. Une table se découpe en `columns`,
+  `table`, `toolbar`.
+- **O** : ajouter une source de données se fait en écrivant un adaptateur, pas
+  en modifiant les hooks.
+- **L** : toute implémentation d'un port est substituable sans changer l'appelant,
+  y compris dans la gestion d'erreur.
+- **I** : les ports restent étroits. Mieux vaut deux ports qu'un port fourre-tout.
+- **D** : on dépend d'abstractions, jamais de détails d'infrastructure.
+
+## Erreurs
+
+- Les repositories renvoient un `Result<T, DomainError>`, ils ne lèvent pas.
+- Les erreurs métier vivent dans `lib/domain/shared/errors.ts`.
+- On ne laisse jamais remonter une erreur Supabase ou Tauri brute jusqu'à l'UI.
+
+## Nommage
+
+- Fichiers en kebab-case : `contact-status.ts`, `use-contacts.ts`.
+- Types et composants en PascalCase, variables et fonctions en camelCase.
+- Ports suffixés `.port.ts`, implémentations `.mock-repository.ts`,
+  `.supabase-repository.ts`, `.tauri-repository.ts`.
+- Le vocabulaire métier reste en français dans les libellés affichés, en anglais
+  dans le code.
