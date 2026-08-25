@@ -11,6 +11,7 @@ export {
 export {
   getContactDisplayName,
   type Contact,
+  type ContactCalendarDate,
   type ContactCreateInput,
   type ContactId,
   type ContactUpdateInput,

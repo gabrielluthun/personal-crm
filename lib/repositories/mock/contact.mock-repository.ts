@@ -72,11 +72,14 @@ export class MockContactRepository implements ContactPort {
       lastName: input.lastName.trim(),
       email: input.email ?? null,
       linkedinUrl: input.linkedinUrl ?? null,
+      phone: input.phone ?? null,
+      whatsapp: input.whatsapp ?? null,
       jobTitle: input.jobTitle ?? null,
       headline: input.headline ?? null,
       status: input.status ?? "À contacter",
       entrepriseId: input.entrepriseId ?? null,
       notes: input.notes ?? null,
+      lastMessageSentAt: input.lastMessageSentAt ?? null,
       rawData: input.rawData ?? null,
       scrapedAt: input.scrapedAt ?? null,
       ...createTimestamps(),
@@ -96,6 +99,8 @@ export class MockContactRepository implements ContactPort {
       email: input.email === undefined ? current.email : input.email,
       linkedinUrl:
         input.linkedinUrl === undefined ? current.linkedinUrl : input.linkedinUrl,
+      phone: input.phone === undefined ? current.phone : input.phone,
+      whatsapp: input.whatsapp === undefined ? current.whatsapp : input.whatsapp,
       jobTitle: input.jobTitle === undefined ? current.jobTitle : input.jobTitle,
       headline: input.headline === undefined ? current.headline : input.headline,
       status: input.status ?? current.status,
@@ -104,6 +109,10 @@ export class MockContactRepository implements ContactPort {
           ? current.entrepriseId
           : input.entrepriseId,
       notes: input.notes === undefined ? current.notes : input.notes,
+      lastMessageSentAt:
+        input.lastMessageSentAt === undefined
+          ? current.lastMessageSentAt
+          : input.lastMessageSentAt,
       rawData: input.rawData === undefined ? current.rawData : input.rawData,
       scrapedAt:
         input.scrapedAt === undefined ? current.scrapedAt : input.scrapedAt,
