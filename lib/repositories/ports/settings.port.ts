@@ -5,9 +5,7 @@ import type { Result } from "@/lib/domain/shared/result";
  * Logical secret keys. Values are stored in the OS keychain via Tauri Rust.
  * Ports never return secret values to the UI — only presence / success.
  */
-export type SecretKey = "bright_data_token" | "supabase_anon_key";
-
-export type PublicSettingKey = "supabase_url";
+export type SecretKey = "bright_data_token";
 
 export type SettingsPort = {
   hasSecret(key: SecretKey): Promise<Result<boolean, DomainError>>;
@@ -16,11 +14,4 @@ export type SettingsPort = {
     value: string,
   ): Promise<Result<void, DomainError>>;
   deleteSecret(key: SecretKey): Promise<Result<void, DomainError>>;
-  getPublicSetting(
-    key: PublicSettingKey,
-  ): Promise<Result<string | null, DomainError>>;
-  setPublicSetting(
-    key: PublicSettingKey,
-    value: string,
-  ): Promise<Result<void, DomainError>>;
 };
