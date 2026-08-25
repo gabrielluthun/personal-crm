@@ -25,6 +25,7 @@ export function ThemeToggle() {
           <Button
             variant="ghost"
             size="icon-sm"
+            className="relative"
             aria-label="Changer le thème"
           />
         }
@@ -33,20 +34,20 @@ export function ThemeToggle() {
         <MoonIcon className="absolute size-4 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-40">
-        <DropdownMenuLabel>Apparence</DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={theme ?? "system"}
           onValueChange={setTheme}
         >
-          <DropdownMenuRadioItem value="light">
+          <DropdownMenuLabel>Apparence</DropdownMenuLabel>
+          <DropdownMenuRadioItem value="light" closeOnClick>
             <SunIcon aria-hidden="true" />
             Clair
           </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="dark">
+          <DropdownMenuRadioItem value="dark" closeOnClick>
             <MoonIcon aria-hidden="true" />
             Sombre
           </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="system">
+          <DropdownMenuRadioItem value="system" closeOnClick>
             <MonitorIcon aria-hidden="true" />
             Système
           </DropdownMenuRadioItem>
