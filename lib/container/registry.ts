@@ -10,10 +10,11 @@ import type { SettingsPort } from "@/lib/repositories/ports/settings.port";
 import type { TemplatePort } from "@/lib/repositories/ports/template.port";
 import { SupabaseContactRepository } from "@/lib/repositories/supabase/contact.supabase-repository";
 import { SupabaseEntrepriseRepository } from "@/lib/repositories/supabase/entreprise.supabase-repository";
+import { TauriJobSearchRepository } from "@/lib/repositories/tauri/job-search.tauri-repository";
 import { TauriSettingsRepository } from "@/lib/repositories/tauri/settings.tauri-repository";
 import { isTauri } from "@/lib/tauri/is-tauri";
 
-/** Persistence backends for CRM entities. Job search stays mock until Tauri. */
+/** Persistence backends for CRM entities. */
 export type DataSource = "mock" | "supabase";
 
 export type AppRepositories = {
@@ -45,16 +46,24 @@ function createSettingsRepository(): SettingsPort {
   return new MockSettingsRepository();
 }
 
+function createJobSearchRepository(): JobSearchPort {
+  if (isTauri()) {
+    return new TauriJobSearchRepository();
+  }
+  return new MockJobSearchRepository();
+}
+
 export function createRepositories(
   source: DataSource = resolveDataSource(),
 ): AppRepositories {
   const settings = createSettingsRepository();
+  const jobSearch = createJobSearchRepository();
 
   if (source === "supabase") {
     return {
       entreprises: new SupabaseEntrepriseRepository(),
       contacts: new SupabaseContactRepository(),
-      jobSearch: new MockJobSearchRepository(),
+      jobSearch,
       templates: new MockTemplateRepository(),
       settings,
     };
@@ -63,7 +72,7 @@ export function createRepositories(
   return {
     entreprises: new MockEntrepriseRepository(),
     contacts: new MockContactRepository(),
-    jobSearch: new MockJobSearchRepository(),
+    jobSearch,
     templates: new MockTemplateRepository(),
     settings,
   };
