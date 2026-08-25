@@ -5,6 +5,11 @@ import { StatusSelect } from "@/components/contact/status-select";
 import type { DataTableColumn } from "@/components/data-table/data-table";
 import { ExternalLinkCell } from "@/components/data-table/external-link-cell";
 import {
+  HeaderSelectionCheckbox,
+  SelectionCheckbox,
+} from "@/components/data-table/selection-checkbox";
+import type { HeaderSelectionState } from "@/hooks/use-row-selection";
+import {
   getContactDisplayName,
   type Contact,
   type ContactId,
@@ -14,6 +19,10 @@ import type { EntrepriseId } from "@/lib/domain/entreprise";
 
 type ContactColumnsOptions = {
   readonly updatingId: ContactId | null;
+  readonly isSelected: (id: ContactId) => boolean;
+  readonly onToggle: (id: ContactId) => void;
+  readonly headerState: HeaderSelectionState;
+  readonly onToggleAll: () => void;
   readonly onStatusChange: (
     id: ContactId,
     status: ContactStatus,
@@ -28,6 +37,26 @@ export function createContactColumns(
   options: ContactColumnsOptions,
 ): DataTableColumn<Contact>[] {
   return [
+    {
+      id: "select",
+      headerClassName: "w-10",
+      className: "w-10",
+      header: (
+        <HeaderSelectionCheckbox
+          state={options.headerState}
+          onToggleAll={options.onToggleAll}
+        />
+      ),
+      cell: (row) => (
+        <SelectionCheckbox
+          checked={options.isSelected(row.id)}
+          aria-label={`Sélectionner ${getContactDisplayName(row)}`}
+          onCheckedChange={() => {
+            options.onToggle(row.id);
+          }}
+        />
+      ),
+    },
     {
       id: "name",
       header: "Nom",
