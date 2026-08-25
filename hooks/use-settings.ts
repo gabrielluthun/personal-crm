@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 import { useRepositories } from "@/components/providers/repository-provider";
 import type { DomainError } from "@/lib/domain/shared/errors";
@@ -24,6 +24,7 @@ export function useSettings() {
   >({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<DomainError | null>(null);
+  const isMountedRef = useRef(true);
 
   const loadPresence = useEffectEvent(async () => {
     setIsLoading(true);
@@ -34,6 +35,10 @@ export function useSettings() {
       settings.hasSecret("supabase_anon_key"),
       settings.getPublicSetting("supabase_url"),
     ]);
+
+    if (!isMountedRef.current) {
+      return;
+    }
 
     if (!bright.ok) {
       setError(bright.error);
@@ -62,10 +67,14 @@ export function useSettings() {
   });
 
   useEffect(() => {
+    isMountedRef.current = true;
     void (async () => {
       await Promise.resolve();
       await loadPresence();
     })();
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
   async function saveSecret(
