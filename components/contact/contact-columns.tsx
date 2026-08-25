@@ -3,11 +3,14 @@
 import { EntrepriseSelect } from "@/components/contact/entreprise-select";
 import { StatusSelect } from "@/components/contact/status-select";
 import type { DataTableColumn } from "@/components/data-table/data-table";
-import { ExternalLinkCell } from "@/components/data-table/external-link-cell";
 import {
   HeaderSelectionCheckbox,
   SelectionCheckbox,
 } from "@/components/data-table/selection-checkbox";
+import {
+  UrlPresenceFilterControl,
+  type UrlPresenceFilter,
+} from "@/components/entreprise/url-presence-filter";
 import type { HeaderSelectionState } from "@/hooks/use-row-selection";
 import {
   getContactDisplayName,
@@ -17,12 +20,18 @@ import {
 import type { ContactStatus } from "@/lib/domain/contact-status";
 import type { EntrepriseId } from "@/lib/domain/entreprise";
 
+export type ContactListFilters = {
+  readonly entreprise: UrlPresenceFilter;
+};
+
 type ContactColumnsOptions = {
   readonly updatingId: ContactId | null;
   readonly isSelected: (id: ContactId) => boolean;
   readonly onToggle: (id: ContactId) => void;
   readonly headerState: HeaderSelectionState;
   readonly onToggleAll: () => void;
+  readonly listFilters: ContactListFilters;
+  readonly onListFiltersChange: (next: ContactListFilters) => void;
   readonly onStatusChange: (
     id: ContactId,
     status: ContactStatus,
@@ -36,6 +45,8 @@ type ContactColumnsOptions = {
 export function createContactColumns(
   options: ContactColumnsOptions,
 ): DataTableColumn<Contact>[] {
+  const { listFilters, onListFiltersChange } = options;
+
   return [
     {
       id: "select",
@@ -68,7 +79,15 @@ export function createContactColumns(
     },
     {
       id: "entreprise",
-      header: "Entreprise",
+      header: (
+        <UrlPresenceFilterControl
+          label="Entreprise"
+          value={listFilters.entreprise}
+          onChange={(entreprise) => {
+            onListFiltersChange({ ...listFilters, entreprise });
+          }}
+        />
+      ),
       cell: (row) => (
         <div
           onClick={(event) => {
@@ -120,12 +139,15 @@ export function createContactColumns(
         </div>
       ),
     },
-    {
-      id: "linkedin",
-      header: "Connexion LinkedIn",
-      cell: (row) => (
-        <ExternalLinkCell href={row.linkedinUrl} label="LinkedIn" />
-      ),
-    },
   ];
+}
+
+export function filterContactsByListFilters(
+  items: readonly Contact[],
+  filters: ContactListFilters,
+): readonly Contact[] {
+  if (filters.entreprise === "all") {
+    return items;
+  }
+  return items.filter((item) => item.entrepriseId !== null);
 }
