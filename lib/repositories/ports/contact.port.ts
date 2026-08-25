@@ -37,4 +37,5 @@ export type ContactPort = {
     input: ContactUpdateInput,
   ): Promise<Result<Contact, DomainError>>;
   delete(id: ContactId): Promise<Result<void, DomainError>>;
+  deleteMany(ids: readonly ContactId[]): Promise<Result<void, DomainError>>;
 };
