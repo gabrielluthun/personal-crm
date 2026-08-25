@@ -1,7 +1,8 @@
 "use client";
 
-import { toast } from "sonner";
+import { useState } from "react";
 
+import { ContactEditDialog } from "@/components/contact/contact-edit-dialog";
 import { ContactTable } from "@/components/contact/contact-table";
 import { ContactTabs } from "@/components/contact/contact-tabs";
 import { ContactToolbar } from "@/components/contact/contact-toolbar";
@@ -19,19 +20,20 @@ export default function ContactPage() {
     setTab,
     isLoading,
     error,
+    create,
     update,
   } = useContacts();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [activeContact, setActiveContact] = useState<Contact | null>(null);
 
   function handleCreate(): void {
-    toast.message("Fiche d'édition à venir", {
-      description: "La création de contact arrive à l'étape suivante.",
-    });
+    setActiveContact(null);
+    setDialogOpen(true);
   }
 
   function handleRowClick(contact: Contact): void {
-    toast.message("Fiche d'édition à venir", {
-      description: `« ${contact.firstName} ${contact.lastName} » s'ouvrira dans une boîte de dialogue.`,
-    });
+    setActiveContact(contact);
+    setDialogOpen(true);
   }
 
   return (
@@ -66,6 +68,14 @@ export default function ContactPage() {
           {total} contact{total === 1 ? "" : "s"}
         </p>
       </div>
+
+      <ContactEditDialog
+        open={dialogOpen}
+        contact={activeContact}
+        onOpenChange={setDialogOpen}
+        onCreate={create}
+        onUpdate={update}
+      />
     </div>
   );
 }
