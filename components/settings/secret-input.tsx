@@ -8,11 +8,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+type StatusBadge = {
+  readonly label: string;
+  readonly variant: "default" | "secondary" | "destructive" | "outline";
+};
+
 type SecretInputProps = {
   readonly id: string;
   readonly label: string;
   readonly description?: string;
   readonly configured: boolean;
+  /** Overrides the default Configuré / Non configuré badge when provided. */
+  readonly statusBadge?: StatusBadge;
   readonly disabled?: boolean;
   readonly isSaving?: boolean;
   readonly onSave: (value: string) => Promise<void>;
@@ -28,6 +35,7 @@ export function SecretInput({
   label,
   description,
   configured,
+  statusBadge,
   disabled = false,
   isSaving = false,
   onSave,
@@ -35,6 +43,12 @@ export function SecretInput({
 }: SecretInputProps) {
   const [value, setValue] = useState("");
   const [revealed, setRevealed] = useState(false);
+
+  const badge: StatusBadge =
+    statusBadge ??
+    (configured
+      ? { label: "Configuré", variant: "secondary" }
+      : { label: "Non configuré", variant: "outline" });
 
   async function handleSave(): Promise<void> {
     const trimmed = value.trim();
@@ -50,11 +64,7 @@ export function SecretInput({
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-2">
         <Label htmlFor={id}>{label}</Label>
-        {configured ? (
-          <Badge variant="secondary">Configuré</Badge>
-        ) : (
-          <Badge variant="outline">Non configuré</Badge>
-        )}
+        <Badge variant={badge.variant}>{badge.label}</Badge>
       </div>
       {description !== undefined ? (
         <p className="text-xs text-muted-foreground">{description}</p>
