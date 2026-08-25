@@ -1,13 +1,3 @@
--- ============================================================================
--- personal-crm — schéma Supabase / PostgreSQL (UUID + Bright Data)
--- ============================================================================
--- Application de bureau single-user : PAS d'Auth Supabase, PAS de comptes.
--- La clé anon (dans le bundle) est le secret d'accès. RLS est ouverte pour
--- le rôle anon uniquement — ne jamais exposer la clé hors de ta machine.
---
--- Développement : DROP CASCADE puis recreate (anciens id text non castables).
--- ============================================================================
-
 create extension if not exists pg_trgm;
 create extension if not exists pgcrypto;
 
@@ -26,7 +16,6 @@ drop type if exists public.contact_status cascade;
 
 
 -- ─── 1. Enum pipeline ───────────────────────────────────────────────────────
--- = lib/domain/contact-status.ts
 
 create type public.contact_status as enum (
   'À contacter',
@@ -198,8 +187,6 @@ create index entreprises_raw_data_gin_idx
 
 
 -- ─── 4. RLS — single-user, rôle anon ────────────────────────────────────────
--- Pas de multi-tenant. Quiconque possède la clé anon a accès total.
--- Ne jamais committer .env.local ni publier la clé.
 
 alter table public.entreprises  enable row level security;
 alter table public.contacts     enable row level security;
