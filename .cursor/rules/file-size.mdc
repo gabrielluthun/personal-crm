@@ -1,0 +1,30 @@
+---
+description: Plafond de taille des fichiers et stratégie de découpage
+alwaysApply: true
+---
+
+# Taille des fichiers
+
+- **200 lignes maximum** par fichier, cible **150 lignes**.
+- Le plafond s'applique au code source comme aux fichiers Rust.
+- Les fichiers générés par un outil tiers en sont exclus.
+
+## Comment scinder
+
+Quand un fichier approche la limite, on découpe par responsabilité, jamais
+arbitrairement au milieu :
+
+| Cas | Découpage |
+| --- | --- |
+| Table de données | `*-columns.tsx`, `*-table.tsx`, `*-toolbar.tsx` |
+| Formulaire dans un dialog | `*-form.tsx` + `*-edit-dialog.tsx` |
+| Logique d'un formulaire | extraire un `use-*-form.ts` dans `hooks/` |
+| Jeu de données mock | un fichier par entité dans `lib/data/mocks/` |
+| Module Rust | un fichier par domaine de commandes |
+
+## À ne pas faire
+
+- Réduire le nombre de lignes en supprimant les retours à la ligne ou en
+  compactant le code.
+- Créer un fichier `utils.ts` fourre-tout pour vider un composant.
+- Déplacer du code dans un fichier qui n'a rien à voir avec sa responsabilité.
