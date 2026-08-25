@@ -100,6 +100,29 @@ export function ContactForm({
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
+        <Field id="contact-job-title" label="Poste">
+          <Input
+            id="contact-job-title"
+            value={values.jobTitle}
+            disabled={disabled}
+            onChange={(event) => {
+              onChange("jobTitle", event.target.value);
+            }}
+          />
+        </Field>
+        <Field id="contact-headline" label="Headline">
+          <Input
+            id="contact-headline"
+            value={values.headline}
+            disabled={disabled}
+            onChange={(event) => {
+              onChange("headline", event.target.value);
+            }}
+          />
+        </Field>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
         <Field id="contact-status" label="Statut">
           <StatusSelect
             id="contact-status"
