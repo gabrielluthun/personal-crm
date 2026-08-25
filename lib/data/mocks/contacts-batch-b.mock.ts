@@ -9,8 +9,11 @@ const ts = (iso: string) => ({
 });
 
 const scrapeDefaults = {
+  phone: null,
+  whatsapp: null,
   jobTitle: null,
   headline: null,
+  lastMessageSentAt: null,
   rawData: null,
   scrapedAt: null,
 } as const;
