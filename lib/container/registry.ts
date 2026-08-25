@@ -1,15 +1,19 @@
 import { MockContactRepository } from "@/lib/repositories/mock/contact.mock-repository";
 import { MockEntrepriseRepository } from "@/lib/repositories/mock/entreprise.mock-repository";
+import { MockInteractionRepository } from "@/lib/repositories/mock/interaction.mock-repository";
 import { MockJobSearchRepository } from "@/lib/repositories/mock/job-search.mock-repository";
 import { MockSettingsRepository } from "@/lib/repositories/mock/settings.mock-repository";
 import { MockTemplateRepository } from "@/lib/repositories/mock/template.mock-repository";
 import type { ContactPort } from "@/lib/repositories/ports/contact.port";
 import type { EntreprisePort } from "@/lib/repositories/ports/entreprise.port";
+import type { InteractionPort } from "@/lib/repositories/ports/interaction.port";
 import type { JobSearchPort } from "@/lib/repositories/ports/job-search.port";
 import type { SettingsPort } from "@/lib/repositories/ports/settings.port";
 import type { TemplatePort } from "@/lib/repositories/ports/template.port";
 import { SupabaseContactRepository } from "@/lib/repositories/supabase/contact.supabase-repository";
 import { SupabaseEntrepriseRepository } from "@/lib/repositories/supabase/entreprise.supabase-repository";
+import { SupabaseInteractionRepository } from "@/lib/repositories/supabase/interaction.supabase-repository";
+import { SupabaseTemplateRepository } from "@/lib/repositories/supabase/template.supabase-repository";
 import { TauriJobSearchRepository } from "@/lib/repositories/tauri/job-search.tauri-repository";
 import { TauriSettingsRepository } from "@/lib/repositories/tauri/settings.tauri-repository";
 import { isTauri } from "@/lib/tauri/is-tauri";
@@ -20,6 +24,7 @@ export type DataSource = "mock" | "supabase";
 export type AppRepositories = {
   readonly entreprises: EntreprisePort;
   readonly contacts: ContactPort;
+  readonly interactions: InteractionPort;
   readonly jobSearch: JobSearchPort;
   readonly templates: TemplatePort;
   readonly settings: SettingsPort;
@@ -63,8 +68,9 @@ export function createRepositories(
     return {
       entreprises: new SupabaseEntrepriseRepository(),
       contacts: new SupabaseContactRepository(),
+      interactions: new SupabaseInteractionRepository(),
       jobSearch,
-      templates: new MockTemplateRepository(),
+      templates: new SupabaseTemplateRepository(),
       settings,
     };
   }
@@ -72,6 +78,7 @@ export function createRepositories(
   return {
     entreprises: new MockEntrepriseRepository(),
     contacts: new MockContactRepository(),
+    interactions: new MockInteractionRepository(),
     jobSearch,
     templates: new MockTemplateRepository(),
     settings,
