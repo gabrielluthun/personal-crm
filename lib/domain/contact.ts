@@ -6,17 +6,23 @@ import type { IsoDateTime, Timestamps } from "@/lib/domain/shared/timestamps";
 
 export type ContactId = Id<"Contact">;
 
+/** Calendar date `YYYY-MM-DD` (Postgres `date`). */
+export type ContactCalendarDate = string;
+
 export type Contact = Timestamps & {
   readonly id: ContactId;
   readonly firstName: string;
   readonly lastName: string;
   readonly email: string | null;
   readonly linkedinUrl: string | null;
+  readonly phone: string | null;
+  readonly whatsapp: string | null;
   readonly jobTitle: string | null;
   readonly headline: string | null;
   readonly status: ContactStatus;
   readonly entrepriseId: EntrepriseId | null;
   readonly notes: string | null;
+  readonly lastMessageSentAt: ContactCalendarDate | null;
   readonly rawData: JsonValue | null;
   readonly scrapedAt: IsoDateTime | null;
 };
@@ -26,11 +32,14 @@ export type ContactCreateInput = {
   readonly lastName: string;
   readonly email?: string | null;
   readonly linkedinUrl?: string | null;
+  readonly phone?: string | null;
+  readonly whatsapp?: string | null;
   readonly jobTitle?: string | null;
   readonly headline?: string | null;
   readonly status?: ContactStatus;
   readonly entrepriseId?: EntrepriseId | null;
   readonly notes?: string | null;
+  readonly lastMessageSentAt?: ContactCalendarDate | null;
   readonly rawData?: JsonValue | null;
   readonly scrapedAt?: IsoDateTime | null;
 };
@@ -40,11 +49,14 @@ export type ContactUpdateInput = {
   readonly lastName?: string;
   readonly email?: string | null;
   readonly linkedinUrl?: string | null;
+  readonly phone?: string | null;
+  readonly whatsapp?: string | null;
   readonly jobTitle?: string | null;
   readonly headline?: string | null;
   readonly status?: ContactStatus;
   readonly entrepriseId?: EntrepriseId | null;
   readonly notes?: string | null;
+  readonly lastMessageSentAt?: ContactCalendarDate | null;
   readonly rawData?: JsonValue | null;
   readonly scrapedAt?: IsoDateTime | null;
 };
