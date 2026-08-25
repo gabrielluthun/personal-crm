@@ -1,0 +1,47 @@
+---
+description: Contraintes de l'export statique Next.js dans une webview Tauri et règles de sécurité desktop
+alwaysApply: true
+---
+
+# Tauri v2 + Next.js en export statique
+
+Le frontend est compilé avec `output: 'export'` et servi par le protocole
+`asset` de Tauri. Il n'existe aucun serveur Node à l'exécution.
+
+## Interdit par construction
+
+- Route Handlers (`app/**/route.ts`).
+- Middleware (`middleware.ts`, `proxy.ts`).
+- Server Actions (`"use server"`).
+- `next/image` avec optimisation : `images.unoptimized` est obligatoire.
+- Routes dynamiques (`[id]`) : elles imposeraient `generateStaticParams`.
+- `revalidate`, `fetch` avec cache serveur, `cookies()`, `headers()`.
+
+## Conséquences sur le design
+
+- Toutes les pages sont des Client Components.
+- Une vue de détail s'ouvre dans un `Sheet` ou un `Dialog` piloté par l'état
+  local, jamais par une navigation vers une route paramétrée.
+- `trailingSlash: true` est requis pour que l'export produise
+  `out/contact/index.html`, résolvable par le protocole `asset`.
+- Les liens externes passent par `lib/tauri/open-external.ts`. Un
+  `target="_blank"` ouvrirait une page dans la webview, sans barre d'adresse ni
+  moyen de revenir en arrière.
+- Tout code qui touche à `window`, `localStorage` ou `invoke` doit être protégé
+  par la garde `isTauri()` de `lib/tauri/is-tauri.ts`, sinon `pnpm dev` dans un
+  navigateur casse.
+
+## Sécurité
+
+- **Aucun secret dans le bundle.** Une variable `NEXT_PUBLIC_*` est inlinée en
+  clair dans le JavaScript au moment du build et reste extractible de
+  l'application packagée. Seule la clé `anon` Supabase, protégée par RLS, y est
+  admise.
+- Les jetons sensibles (Bright Data) sont saisis à l'exécution dans Settings et
+  stockés dans le trousseau du système via `src-tauri/src/secrets.rs`.
+- Aucune commande Tauri ne renvoie la valeur d'un secret au frontend. Les
+  appels réseau qui ont besoin du jeton sont exécutés côté Rust.
+- La CSP de `tauri.conf.json` reste restrictive. On n'y ajoute une origine
+  qu'avec une justification explicite.
+- Les capacités de `src-tauri/capabilities/` sont énumérées une par une. Aucune
+  permission large de type `fs:default` ou `shell:allow-execute`.
