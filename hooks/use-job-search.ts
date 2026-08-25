@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { useRepositories } from "@/components/providers/repository-provider";
 import type { JobOffer, JobSearchQuery } from "@/lib/domain/job-offer";
@@ -18,15 +18,23 @@ export function useJobSearch() {
   const [error, setError] = useState<DomainError | null>(null);
   const [status, setStatus] = useState<JobSearchStatus>("idle");
   const [lastQuery, setLastQuery] = useState<JobSearchQuery | null>(null);
+  const generationRef = useRef(0);
 
   async function search(
     query: JobSearchQuery,
   ): Promise<Result<readonly JobOffer[], DomainError>> {
+    generationRef.current += 1;
+    const generation = generationRef.current;
     setStatus("loading");
     setError(null);
     setLastQuery(query);
 
     const result = await jobSearch.search(query);
+    // A slower earlier search must not overwrite a newer one.
+    if (generation !== generationRef.current) {
+      return result;
+    }
+
     if (result.ok) {
       setOffers(result.value);
       setError(null);
@@ -46,6 +54,7 @@ export function useJobSearch() {
   }
 
   function clear(): void {
+    generationRef.current += 1;
     setOffers([]);
     setError(null);
     setStatus("idle");
