@@ -8,6 +8,8 @@ import type { NavItem } from "@/lib/navigation/nav-items";
 
 type SidebarNavLinkProps = {
   readonly item: NavItem;
+  /** When true, always show the label (e.g. mobile drawer). */
+  readonly forceExpanded?: boolean;
 };
 
 function normalizePath(path: string): string {
@@ -17,7 +19,10 @@ function normalizePath(path: string): string {
   return path.endsWith("/") ? path : `${path}/`;
 }
 
-export function SidebarNavLink({ item }: SidebarNavLinkProps) {
+export function SidebarNavLink({
+  item,
+  forceExpanded = false,
+}: SidebarNavLinkProps) {
   const pathname = usePathname();
   const current = normalizePath(pathname);
   const target = normalizePath(item.href);
@@ -27,16 +32,23 @@ export function SidebarNavLink({ item }: SidebarNavLinkProps) {
   return (
     <Link
       href={item.href}
+      aria-label={item.label}
       aria-current={isActive ? "page" : undefined}
+      title={forceExpanded ? undefined : item.label}
       className={cn(
-        "flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
+        "flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium transition-colors",
+        // Explicit clamp+vw so sidebar type scales with the window (max 16px).
+        "text-[length:clamp(0.875rem,0.75rem+0.4vw,1rem)]",
         "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+        !forceExpanded && "justify-center lg:justify-start",
         isActive &&
           "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm",
       )}
     >
-      <Icon className="size-4 shrink-0" aria-hidden="true" />
-      <span>{item.label}</span>
+      <Icon className="size-[1.1em] shrink-0" aria-hidden="true" />
+      <span className={cn(forceExpanded ? "inline" : "hidden lg:inline")}>
+        {item.label}
+      </span>
     </Link>
   );
 }

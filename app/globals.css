@@ -46,6 +46,12 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* Fluid type: scales with viewport, capped so UI stays readable but not huge */
+  --text-fluid-nav: clamp(1rem, 0.88rem + 0.55vw, 1.25rem);
+  --text-fluid-title: clamp(1.4rem, 1.1rem + 1.2vw, 2.1rem);
+  --text-fluid-lead: clamp(0.95rem, 0.82rem + 0.5vw, 1.25rem);
+  --text-fluid-body: clamp(0.9rem, 0.82rem + 0.4vw, 1.125rem);
+  --text-fluid-meta: clamp(0.8rem, 0.72rem + 0.3vw, 1rem);
 }
 
 :root {

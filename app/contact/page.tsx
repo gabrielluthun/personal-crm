@@ -9,7 +9,7 @@ export default function ContactPage() {
         title="Contact"
         description="Pipeline de contacts et suivi des échanges."
       />
-      <div className="px-6 py-8 text-sm text-muted-foreground">
+      <div className="px-4 py-6 text-fluid-body text-muted-foreground sm:px-6 md:px-8">
         Contenu à venir — table des contacts, filtres et statuts.
       </div>
     </div>

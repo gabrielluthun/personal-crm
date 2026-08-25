@@ -9,7 +9,7 @@ export default function TemplatesPage() {
         title="Templates"
         description="Icebreakers et modèles de messages avec variables."
       />
-      <div className="px-6 py-8 text-sm text-muted-foreground">
+      <div className="px-4 py-6 text-fluid-body text-muted-foreground sm:px-6 md:px-8">
         Contenu à venir — grille de templates et aperçu rendu.
       </div>
     </div>
