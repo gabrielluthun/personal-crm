@@ -1,0 +1,111 @@
+import { MOCK_CONTACTS } from "@/lib/data/mocks/contacts.mock";
+import type {
+  Contact,
+  ContactCreateInput,
+  ContactId,
+  ContactUpdateInput,
+} from "@/lib/domain/contact";
+import type { EntrepriseId } from "@/lib/domain/entreprise";
+import { notFoundError } from "@/lib/domain/shared/errors";
+import { generateId } from "@/lib/domain/shared/id";
+import { err, ok } from "@/lib/domain/shared/result";
+import {
+  createTimestamps,
+  touchUpdatedAt,
+} from "@/lib/domain/shared/timestamps";
+import type {
+  ContactListQuery,
+  ContactPort,
+} from "@/lib/repositories/ports/contact.port";
+import {
+  InMemoryStore,
+  compareStrings,
+  paginateItems,
+} from "@/lib/repositories/mock/in-memory-store";
+
+export class MockContactRepository implements ContactPort {
+  private readonly store = new InMemoryStore<Contact>(MOCK_CONTACTS);
+
+  async list(query: ContactListQuery = {}) {
+    let items = [...(await this.store.all())];
+    const search = query.search?.trim().toLowerCase();
+    if (search) {
+      items = items.filter((item) => {
+        const haystack =
+          `${item.firstName} ${item.lastName} ${item.email ?? ""}`.toLowerCase();
+        return haystack.includes(search);
+      });
+    }
+    if (query.status) {
+      items = items.filter((item) => item.status === query.status);
+    }
+    if (query.statuses && query.statuses.length > 0) {
+      const allowed = new Set(query.statuses);
+      items = items.filter((item) => allowed.has(item.status));
+    }
+    if (query.entrepriseId !== undefined) {
+      items = items.filter((item) => item.entrepriseId === query.entrepriseId);
+    }
+    const sort = query.sort ?? { field: "lastName", direction: "asc" };
+    items.sort((left, right) =>
+      compareStrings(String(left[sort.field]), String(right[sort.field]), sort.direction),
+    );
+    return ok(paginateItems(items, query.pagination));
+  }
+
+  async listByEntreprise(entrepriseId: EntrepriseId) {
+    const items = (await this.store.all()).filter(
+      (item) => item.entrepriseId === entrepriseId,
+    );
+    return ok(items);
+  }
+
+  async getById(id: ContactId) {
+    const found = await this.store.findById(id);
+    return found ? ok(found) : err(notFoundError("Contact", id));
+  }
+
+  async create(input: ContactCreateInput) {
+    const created: Contact = {
+      id: generateId<"Contact">("ct"),
+      firstName: input.firstName.trim(),
+      lastName: input.lastName.trim(),
+      email: input.email ?? null,
+      linkedinUrl: input.linkedinUrl ?? null,
+      status: input.status ?? "À contacter",
+      entrepriseId: input.entrepriseId ?? null,
+      notes: input.notes ?? null,
+      ...createTimestamps(),
+    };
+    return ok(await this.store.insert(created));
+  }
+
+  async update(id: ContactId, input: ContactUpdateInput) {
+    const current = await this.store.findById(id);
+    if (!current) {
+      return err(notFoundError("Contact", id));
+    }
+    const updated: Contact = {
+      ...current,
+      firstName: input.firstName?.trim() ?? current.firstName,
+      lastName: input.lastName?.trim() ?? current.lastName,
+      email: input.email === undefined ? current.email : input.email,
+      linkedinUrl:
+        input.linkedinUrl === undefined ? current.linkedinUrl : input.linkedinUrl,
+      status: input.status ?? current.status,
+      entrepriseId:
+        input.entrepriseId === undefined
+          ? current.entrepriseId
+          : input.entrepriseId,
+      notes: input.notes === undefined ? current.notes : input.notes,
+      ...touchUpdatedAt(current),
+    };
+    const saved = await this.store.replace(id, updated);
+    return saved ? ok(saved) : err(notFoundError("Contact", id));
+  }
+
+  async delete(id: ContactId) {
+    const removed = await this.store.remove(id);
+    return removed ? ok(undefined) : err(notFoundError("Contact", id));
+  }
+}
