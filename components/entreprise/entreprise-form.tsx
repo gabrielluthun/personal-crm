@@ -96,6 +96,34 @@ export function EntrepriseForm({
           }}
         />
       </Field>
+      <Field id="entreprise-location" label="Localisation">
+        <Input
+          id="entreprise-location"
+          value={values.location}
+          disabled={disabled}
+          placeholder="Paris, France"
+          onChange={(event) => {
+            onChange("location", event.target.value);
+          }}
+        />
+      </Field>
+      <Field
+        id="entreprise-target-offer"
+        label="Offre cible"
+        error={fieldErrors.targetOfferUrl}
+      >
+        <Input
+          id="entreprise-target-offer"
+          type="url"
+          value={values.targetOfferUrl}
+          disabled={disabled}
+          placeholder="https://…"
+          aria-invalid={fieldErrors.targetOfferUrl !== undefined}
+          onChange={(event) => {
+            onChange("targetOfferUrl", event.target.value);
+          }}
+        />
+      </Field>
       <Field id="entreprise-notes" label="Notes">
         <Textarea
           id="entreprise-notes"
