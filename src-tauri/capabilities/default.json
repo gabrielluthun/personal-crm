@@ -6,6 +6,7 @@
   "permissions": [
     "core:default",
     "opener:allow-open-url",
-    "allow-secret-commands"
+    "allow-secret-commands",
+    "allow-job-search"
   ]
 }

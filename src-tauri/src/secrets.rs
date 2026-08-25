@@ -55,7 +55,6 @@ pub fn delete_secret(key: String) -> Result<(), AppError> {
 
 /// Reads a secret for internal Rust use only (e.g. Bright Data bridge).
 /// Must never be exposed as a Tauri command to the frontend.
-#[allow(dead_code)]
 pub fn read_secret_internal(key: &str) -> Result<Option<String>, AppError> {
   let entry = entry_for(key)?;
   match entry.get_password() {
