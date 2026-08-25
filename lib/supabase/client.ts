@@ -9,6 +9,7 @@ let client: AppSupabaseClient | null = null;
 
 /**
  * Lazy singleton. Uses only the public anon key (RLS-protected).
+ * No Auth session — personal CRM, single-user, clé anon = secret d'accès.
  * Never put service_role in the desktop bundle.
  */
 export function getSupabaseClient(): AppSupabaseClient {
