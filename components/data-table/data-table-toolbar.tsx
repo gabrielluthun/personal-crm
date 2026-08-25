@@ -11,6 +11,7 @@ type DataTableToolbarProps = {
   readonly onSearchChange: (value: string) => void;
   readonly searchPlaceholder?: string;
   readonly searchLabel?: string;
+  readonly searchWrapperClassName?: string;
   readonly actions?: ReactNode;
   readonly className?: string;
 };
@@ -20,6 +21,7 @@ export function DataTableToolbar({
   onSearchChange,
   searchPlaceholder = "Rechercher…",
   searchLabel = "Rechercher dans le tableau",
+  searchWrapperClassName,
   actions,
   className,
 }: DataTableToolbarProps) {
@@ -30,7 +32,12 @@ export function DataTableToolbar({
         className,
       )}
     >
-      <div className="relative w-full max-w-sm">
+      <div
+        className={cn(
+          "relative w-full max-w-sm",
+          searchWrapperClassName,
+        )}
+      >
         <SearchIcon
           className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
           aria-hidden
