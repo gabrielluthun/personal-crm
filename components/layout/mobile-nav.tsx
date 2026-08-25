@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { MenuIcon } from "lucide-react";
 
 import { NAV_ITEMS } from "@/lib/navigation/nav-items";
@@ -22,12 +21,7 @@ import {
  * Visible below the `md` breakpoint.
  */
 export function MobileNav() {
-  const pathname = usePathname();
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
 
   return (
     <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-3 md:hidden">
@@ -52,7 +46,14 @@ export function MobileNav() {
             aria-label="Navigation principale"
           >
             {NAV_ITEMS.map((item) => (
-              <SidebarNavLink key={item.href} item={item} forceExpanded />
+              <SidebarNavLink
+                key={item.href}
+                item={item}
+                forceExpanded
+                onNavigate={() => {
+                  setOpen(false);
+                }}
+              />
             ))}
           </nav>
           <Separator />
