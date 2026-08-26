@@ -65,6 +65,8 @@ Pas de Route Handlers, pas de Server Actions, pas de middleware Next.
 - (Optionnel) projet Supabase
 - (Optionnel) compte Bright Data avec une zone **SERP** active
 
+
+
 ## Démarrage rapide
 
 ```bash
@@ -84,6 +86,8 @@ en mémoire. Tu peux explorer toutes les pages tout de suite.
 | `pnpm dev`         | UI dans le navigateur (mocks uniquement)    |
 | `pnpm typecheck`   | `tsc --noEmit`                              |
 | `pnpm lint`        | ESLint                                      |
+
+
 
 
 ## Mode navigateur vs desktop
@@ -142,6 +146,8 @@ keychain le voient.
 7. Au fil des échanges, mets à jour le statut et la date du dernier
   message.
 
+
+
 ## Sécurité (en bref)
 
 - **Bright Data** : trousseau OS, jamais dans `.env` ni dans le JS packagé.
@@ -161,18 +167,9 @@ Tauri), composé dans `lib/container`.
 
 Détail : [docs/architecture.md](docs/architecture.md).
 
-## Git (équipe / solo)
-
-- `main` = production (ne pas committer dessus).
-- `develop` = intégration.
-- Une feature = branche `feat/…` ou `chore/…`, un fichier modifié =
-un commit (Conventional Commits, messages en anglais).
-
 ## Limites actuelles
 
-- Recherche : pipeline SERP étapes 1–4 (offres WTTJ + enrichissement
-entreprise). Pas d’enrichissement de profils LinkedIn personnes.
-- Free plan Bright Data : SERP + scrape d’URL publiques, pas d’API
-sociales LinkedIn.
-- Single-user volontaire : pas d’auth multi-comptes.
+- Recherche : Pas d’enrichissement de profils LinkedIn.
+- Free plan Bright Data : SERP + scrape d’URL publiques, pas d’API LinkedIn.
+- Single-user volontaire : **pas d’authentification** via compte (utilisateur / mot de passe).
 
