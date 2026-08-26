@@ -1,6 +1,12 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 export type UrlPresenceFilter = "all" | "with";
@@ -19,54 +25,40 @@ export function UrlPresenceFilterControl({
   className,
 }: UrlPresenceFilterControlProps) {
   return (
-    <div className={cn("flex flex-col gap-1", className)}>
+    <div className={cn("flex items-center gap-1.5", className)}>
       <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      <div
-        role="group"
-        aria-label={`Filtrer ${label}`}
-        className="flex items-center gap-0.5"
+      <Select
+        value={value}
+        onValueChange={(next) => {
+          if (next === "all" || next === "with") {
+            onChange(next);
+          }
+        }}
       >
-        <FilterChip
-          pressed={value === "with"}
-          onClick={() => {
-            onChange("with");
+        <SelectTrigger
+          size="sm"
+          aria-label={`Filtrer ${label}`}
+          className={cn(
+            "h-7 min-w-18 gap-1 px-2 text-xs",
+            value === "with" && "border-ring",
+          )}
+          onClick={(event) => {
+            event.stopPropagation();
           }}
         >
-          Avec
-        </FilterChip>
-        <FilterChip
-          pressed={value === "all"}
-          onClick={() => {
-            onChange("all");
-          }}
-        >
-          Tous
-        </FilterChip>
-      </div>
+          <SelectValue>
+            {value === "with" ? "Avec" : "Tous"}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent align="start">
+          <SelectItem value="with">Avec</SelectItem>
+          <SelectItem value="all">Tous</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 }
 
-type FilterChipProps = {
-  readonly pressed: boolean;
-  readonly onClick: () => void;
-  readonly children: string;
-};
-
-function FilterChip({ pressed, onClick, children }: FilterChipProps) {
-  return (
-    <Button
-      type="button"
-      size="xs"
-      variant={pressed ? "secondary" : "ghost"}
-      aria-pressed={pressed}
-      className="h-6 px-1.5 text-[0.7rem]"
-      onClick={(event) => {
-        event.stopPropagation();
-        onClick();
-      }}
-    >
-      {children}
-    </Button>
-  );
+export function hasUrl(value: string | null | undefined): boolean {
+  return (value?.trim().length ?? 0) > 0;
 }
