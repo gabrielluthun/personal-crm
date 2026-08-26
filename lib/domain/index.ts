@@ -1,7 +1,6 @@
 export {
   CONTACT_STATUSES,
   CONTACT_STATUS_BADGE_VARIANT,
-  DISCUSSION_STATUSES,
   getContactStatusBadgeVariant,
   isContactStatus,
   type ContactStatus,
