@@ -40,9 +40,11 @@ export class MockInteractionRepository implements InteractionPort {
   }
 
   async listByContact(contactId: ContactId) {
-    const items = (await this.store.all()).filter(
-      (item) => item.contactId === contactId,
-    );
+    const items = (await this.store.all())
+      .filter((item) => item.contactId === contactId)
+      .sort((left, right) =>
+        compareStrings(String(left.sentAt), String(right.sentAt), "desc"),
+      );
     return ok(items);
   }
 

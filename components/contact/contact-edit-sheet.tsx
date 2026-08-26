@@ -3,6 +3,8 @@
 import { toast } from "sonner";
 
 import { ContactForm } from "@/components/contact/contact-form";
+import { ContactInteractionHistory } from "@/components/contact/contact-interaction-history";
+import { ContactSendPanel } from "@/components/contact/contact-send-panel";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -14,6 +16,7 @@ import {
 } from "@/components/ui/sheet";
 import { useContactChannels } from "@/hooks/use-contact-channels";
 import { useContactForm } from "@/hooks/use-contact-form";
+import { useContactSend } from "@/hooks/use-contact-send";
 import type {
   Contact,
   ContactCreateInput,
@@ -34,6 +37,7 @@ type ContactEditSheetProps = {
     id: ContactId,
     input: ContactUpdateInput,
   ) => Promise<Result<Contact, DomainError>>;
+  readonly onContactPatched?: (contact: Contact) => void;
 };
 
 export function ContactEditSheet({
@@ -42,6 +46,7 @@ export function ContactEditSheet({
   onOpenChange,
   onCreate,
   onUpdate,
+  onContactPatched,
 }: ContactEditSheetProps) {
   const form = useContactForm({
     contact,
@@ -54,7 +59,42 @@ export function ContactEditSheet({
       onOpenChange(false);
     },
   });
-  const channels = useContactChannels(contact?.id ?? null);
+  const channelsFallback = useContactChannels(contact?.id ?? null);
+  const send = useContactSend({
+    contact,
+    onUpdate,
+    onRecorded: (updated) => {
+      form.setField(
+        "lastMessageSentAt",
+        updated.lastMessageSentAt ?? "",
+      );
+      form.setField("status", updated.status);
+      onContactPatched?.(updated);
+      toast.success("Envoi enregistré");
+    },
+  });
+
+  const isEditing = contact !== null;
+  const channels = isEditing ? send.channels : channelsFallback.channels;
+  const channelsLoading = isEditing
+    ? send.interactionsLoading
+    : channelsFallback.isLoading;
+
+  async function handleCopy(): Promise<void> {
+    const result = await send.copyMessage();
+    if (!result.ok) {
+      toast.error(result.error.message);
+      return;
+    }
+    toast.success("Message copié");
+  }
+
+  async function handleRecord(): Promise<void> {
+    const result = await send.recordSend();
+    if (!result.ok) {
+      toast.error(result.error.message);
+    }
+  }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -69,20 +109,45 @@ export function ContactEditSheet({
           </SheetTitle>
           <SheetDescription>
             {form.isEditing
-              ? "Statut, coordonnées, canaux et notes internes."
+              ? "Statut, envoi, historique et notes internes."
               : "Renseignez le nouveau contact, puis enregistrez."}
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4">
+        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto p-4">
           <ContactForm
             values={form.values}
             fieldErrors={form.fieldErrors}
-            channels={channels.channels}
-            channelsLoading={channels.isLoading}
-            disabled={form.isSubmitting}
+            channels={channels}
+            channelsLoading={channelsLoading}
+            disabled={form.isSubmitting || send.isRecording}
             onChange={form.setField}
           />
+
+          {isEditing ? (
+            <>
+              <ContactSendPanel
+                templates={send.templates}
+                templatesLoading={send.templatesLoading}
+                selectedTemplate={send.selectedTemplate}
+                preview={send.preview}
+                missingLabel={send.missingLabel}
+                isRecording={send.isRecording}
+                actionError={send.actionError}
+                onSelectTemplate={send.selectTemplate}
+                onCopy={() => {
+                  void handleCopy();
+                }}
+                onRecord={() => {
+                  void handleRecord();
+                }}
+              />
+              <ContactInteractionHistory
+                items={send.interactions}
+                isLoading={send.interactionsLoading}
+              />
+            </>
+          ) : null}
 
           {form.submitError !== null ? (
             <p role="alert" className="text-sm text-destructive">
@@ -95,7 +160,7 @@ export function ContactEditSheet({
           <Button
             type="button"
             variant="outline"
-            disabled={form.isSubmitting}
+            disabled={form.isSubmitting || send.isRecording}
             onClick={() => {
               onOpenChange(false);
             }}
@@ -104,7 +169,7 @@ export function ContactEditSheet({
           </Button>
           <Button
             type="button"
-            disabled={form.isSubmitting}
+            disabled={form.isSubmitting || send.isRecording}
             onClick={() => {
               void form.submit();
             }}

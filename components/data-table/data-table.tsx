@@ -33,6 +33,8 @@ type DataTableProps<TRow> = {
   readonly selectedIds?: ReadonlySet<string>;
   readonly onRowClick?: (row: TRow) => void;
   readonly className?: string;
+  /** Keeps the header row visible while the parent scrolls (also when empty). */
+  readonly stickyHeader?: boolean;
 };
 
 export function DataTable<TRow>({
@@ -46,12 +48,15 @@ export function DataTable<TRow>({
   selectedIds,
   onRowClick,
   className,
+  stickyHeader = false,
 }: DataTableProps<TRow>) {
   if (isLoading && rows.length === 0) {
     return <TableSkeleton columnCount={columns.length} />;
   }
 
-  if (!isLoading && rows.length === 0) {
+  const isEmpty = !isLoading && rows.length === 0;
+
+  if (isEmpty && !stickyHeader) {
     return (
       <EmptyState
         title={emptyTitle}
@@ -62,43 +67,70 @@ export function DataTable<TRow>({
   }
 
   return (
-    <Table className={className}>
-      <TableHeader>
+    <Table
+      className={className}
+      containerClassName={stickyHeader ? "overflow-visible" : undefined}
+    >
+      <TableHeader
+        className={
+          stickyHeader
+            ? "sticky top-0 z-10 bg-background [&_tr]:border-b"
+            : undefined
+        }
+      >
         <TableRow>
           {columns.map((column) => (
-            <TableHead key={column.id} className={column.headerClassName}>
+            <TableHead
+              key={column.id}
+              className={cn(
+                stickyHeader && "bg-background",
+                column.headerClassName,
+              )}
+            >
               {column.header}
             </TableHead>
           ))}
         </TableRow>
       </TableHeader>
       <TableBody>
-        {rows.map((row) => {
-          const rowId = getRowId(row);
-          const selected = selectedIds?.has(rowId) ?? false;
-          const clickable = onRowClick !== undefined;
+        {isEmpty ? (
+          <TableRow className="hover:bg-transparent">
+            <TableCell colSpan={columns.length} className="p-0">
+              <EmptyState
+                title={emptyTitle}
+                description={emptyDescription}
+                action={emptyAction}
+              />
+            </TableCell>
+          </TableRow>
+        ) : (
+          rows.map((row) => {
+            const rowId = getRowId(row);
+            const selected = selectedIds?.has(rowId) ?? false;
+            const clickable = onRowClick !== undefined;
 
-          return (
-            <TableRow
-              key={rowId}
-              data-state={selected ? "selected" : undefined}
-              className={cn(clickable && "cursor-pointer")}
-              onClick={
-                clickable
-                  ? () => {
-                      onRowClick(row);
-                    }
-                  : undefined
-              }
-            >
-              {columns.map((column) => (
-                <TableCell key={column.id} className={column.className}>
-                  {column.cell(row)}
-                </TableCell>
-              ))}
-            </TableRow>
-          );
-        })}
+            return (
+              <TableRow
+                key={rowId}
+                data-state={selected ? "selected" : undefined}
+                className={cn(clickable && "cursor-pointer")}
+                onClick={
+                  clickable
+                    ? () => {
+                        onRowClick(row);
+                      }
+                    : undefined
+                }
+              >
+                {columns.map((column) => (
+                  <TableCell key={column.id} className={column.className}>
+                    {column.cell(row)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            );
+          })
+        )}
       </TableBody>
     </Table>
   );

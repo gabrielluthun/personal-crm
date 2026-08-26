@@ -1,6 +1,6 @@
 import {
   TEMPLATE_VARIABLES,
-  isTemplateVariableKey,
+  resolveTemplateVariableKey,
   templateVariableToken,
   type TemplateVariableKey,
 } from "@/lib/domain/template-variables";
@@ -20,6 +20,7 @@ const PLACEHOLDER_PATTERN = /\{\{\s*([a-z_]+)\s*\}\}/gi;
 /**
  * Pure interpolation of `{{variable}}` placeholders.
  * Unknown tokens are left as-is; known keys without values are listed in `missing`.
+ * French aliases (e.g. `{{nom_contact}}`) resolve to canonical English keys.
  */
 export function renderTemplate(
   body: string,
@@ -31,8 +32,8 @@ export function renderTemplate(
   const rendered = body.replace(
     PLACEHOLDER_PATTERN,
     (match, rawKey: string) => {
-      const key = rawKey.trim();
-      if (!isTemplateVariableKey(key)) {
+      const key = resolveTemplateVariableKey(rawKey);
+      if (key === null) {
         return match;
       }
 
@@ -59,8 +60,8 @@ export function listTemplateVariablesInBody(
 ): readonly TemplateVariableKey[] {
   const found = new Set<TemplateVariableKey>();
   for (const match of body.matchAll(PLACEHOLDER_PATTERN)) {
-    const key = match[1]?.trim();
-    if (isTemplateVariableKey(key)) {
+    const key = resolveTemplateVariableKey(match[1] ?? "");
+    if (key !== null) {
       found.add(key);
     }
   }

@@ -11,40 +11,30 @@ import type {
   ContactId,
   ContactUpdateInput,
 } from "@/lib/domain/contact";
-import { DISCUSSION_STATUSES } from "@/lib/domain/contact-status";
 import type { EntrepriseId } from "@/lib/domain/entreprise";
 import type { DomainError } from "@/lib/domain/shared/errors";
 import type { Result } from "@/lib/domain/shared/result";
 
 const DEFAULT_PAGE_SIZE = 50;
 
-export type ContactTab = "all" | "discussion";
-
 export function useContacts() {
   const { contacts } = useRepositories();
   const [search, setSearchState] = useState("");
   const [page, setPage] = useState(1);
-  const [tab, setTabState] = useState<ContactTab>("all");
   const debouncedSearch = useDebouncedValue(search);
 
   const list = useAsyncResource(
     () =>
       contacts.list({
         search: debouncedSearch.trim() || undefined,
-        statuses: tab === "discussion" ? DISCUSSION_STATUSES : undefined,
         pagination: { page, pageSize: DEFAULT_PAGE_SIZE },
         sort: { field: "lastName", direction: "asc" },
       }),
-    [debouncedSearch, page, tab],
+    [debouncedSearch, page],
   );
 
   function setSearch(value: string): void {
     setSearchState(value);
-    setPage(1);
-  }
-
-  function setTab(value: ContactTab): void {
-    setTabState(value);
     setPage(1);
   }
 
@@ -96,8 +86,6 @@ export function useContacts() {
     pageSize: DEFAULT_PAGE_SIZE,
     search,
     setSearch,
-    tab,
-    setTab,
     setPage,
     isLoading: list.isLoading,
     error: list.error,

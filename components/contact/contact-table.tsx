@@ -87,6 +87,7 @@ export function ContactTable({
       isLoading={isLoading}
       selectedIds={selection.selectedIds}
       onRowClick={onRowClick}
+      stickyHeader
       emptyTitle="Aucun contact"
       emptyDescription="Ajoutez un contact ou changez d'onglet / de recherche."
     />
