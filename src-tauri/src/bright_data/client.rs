@@ -27,10 +27,13 @@ struct RequestBody<'a> {
   url: &'a str,
   format: &'a str,
   data_format: &'a str,
-  country: &'a str,
 }
 
-/// POST https://api.brightdata.com/request (SERP / Unlocker).
+/// POST https://api.brightdata.com/request.
+///
+/// `format: raw` + `data_format: parsed_light` returns the light SERP JSON
+/// (`organic` at the top level). `format: json` wraps the same payload in an
+/// empty `body` string; `format: raw` alone returns HTML.
 pub async fn post_request(
   client: &reqwest::Client,
   token: &str,
@@ -43,10 +46,8 @@ pub async fn post_request(
     .json(&RequestBody {
       zone,
       url: target_url,
-      format: "json",
-      // Matches Bright Data "JSON léger" zone default (organic results).
+      format: "raw",
       data_format: "parsed_light",
-      country: "fr",
     })
     .send()
     .await
@@ -60,8 +61,26 @@ pub async fn post_request(
     return Err(AppError::BrightDataHttp(status.as_u16()));
   }
 
-  response
-    .json()
+  let text = response
+    .text()
     .await
-    .map_err(|error| AppError::BrightDataNetwork(error.to_string()))
+    .map_err(|error| AppError::BrightDataNetwork(error.to_string()))?;
+  parse_json_body(&text)
+}
+
+fn parse_json_body(text: &str) -> Result<serde_json::Value, AppError> {
+  let trimmed = text.trim();
+  if trimmed.is_empty() {
+    return Err(AppError::BrightDataParse(
+      "réponse SERP vide".into(),
+    ));
+  }
+  if trimmed.starts_with('<') {
+    return Err(AppError::BrightDataParse(
+      "HTML reçu au lieu de JSON — vérifiez que la zone est SERP (JSON léger)".into(),
+    ));
+  }
+  serde_json::from_str(trimmed).map_err(|error| {
+    AppError::BrightDataParse(format!("JSON illisible: {error}"))
+  })
 }
