@@ -10,6 +10,7 @@ import {
 import { UrlIconLink } from "@/components/entreprise/url-icon-link";
 import {
   UrlPresenceFilterControl,
+  hasUrl,
   type UrlPresenceFilter,
 } from "@/components/entreprise/url-presence-filter";
 import type { HeaderSelectionState } from "@/hooks/use-row-selection";
@@ -136,10 +137,6 @@ function LinkedInMark() {
       <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S.02 4.88.02 3.5 1.14 1 2.5 1s2.48 1.12 2.48 2.5zM.22 8.5h4.56V23H.22V8.5zM8.34 8.5h4.37v1.98h.06c.61-1.16 2.1-2.38 4.32-2.38 4.62 0 5.47 3.04 5.47 7V23h-4.56v-6.7c0-1.6-.03-3.65-2.22-3.65-2.22 0-2.56 1.73-2.56 3.53V23H8.34V8.5z" />
     </svg>
   );
-}
-
-export function hasUrl(value: string | null | undefined): boolean {
-  return (value?.trim().length ?? 0) > 0;
 }
 
 export function filterEntreprisesByUrlPresence(
