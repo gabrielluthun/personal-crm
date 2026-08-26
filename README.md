@@ -134,7 +134,7 @@ l’URL Supabase est renseignée (opt-in volontaire).
 Le jeton **ne circule jamais** vers le frontend : seuls Rust et le
 keychain le voient.
 
-## Parcours type (utilisateur)
+## Parcours type utilisateur
 
 1. Settings → jeton Bright Data + probe OK.
 2. Dashboard → Ville + domaine / mots-clés → Valider.
@@ -148,7 +148,7 @@ keychain le voient.
 
 
 
-## Sécurité (en bref)
+## Sécurité 
 
 - **Bright Data** : trousseau OS, jamais dans `.env` ni dans le JS packagé.
 - **Supabase** : seule la clé `anon` est dans le bundle. Ici la RLS
@@ -160,7 +160,7 @@ passe de ta base. Ne la committe pas, ne la publie pas.
 
 Détail : [docs/security.md](docs/security.md).
 
-## Architecture (dev)
+## Architecture 
 
 Découpage N-tier : UI → hooks → ports → repositories (mock / Supabase /
 Tauri), composé dans `lib/container`.
