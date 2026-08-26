@@ -38,12 +38,6 @@ export const CONTACT_STATUS_BADGE_VARIANT: Record<
   Terminé: "ghost",
 };
 
-/** Statuses shown in the "En discussion" contact tab. */
-export const DISCUSSION_STATUSES: readonly ContactStatus[] = [
-  "En discussion",
-  "Call prévu",
-] as const;
-
 export function isContactStatus(value: unknown): value is ContactStatus {
   return (
     typeof value === "string" &&
