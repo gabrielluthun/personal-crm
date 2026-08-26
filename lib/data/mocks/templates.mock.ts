@@ -18,10 +18,10 @@ export const MOCK_TEMPLATES: readonly MessageTemplate[] = [
     title: "Icebreaker LinkedIn — offre vue",
     description: "Premier message après une offre WTTJ.",
     ...defaults,
-    subject: "{{first_name}}, une immersion avec votre équipe",
-    body: `Bonjour {{first_name}},
+    subject: "{{prenom}}, une immersion avec votre équipe",
+    body: `Bonjour {{prenom}},
 
-J'ai vu le poste {{role}} chez {{company_name}} et votre parcours m'a interpellé.
+J'ai vu le poste {{poste}} chez {{entreprise}} et votre parcours m'a interpellé.
 
 Seriez-vous ouvert·e à un échange de 15 minutes cette semaine ?
 
@@ -33,9 +33,9 @@ Cordialement`,
     title: "Icebreaker — intérêt produit",
     description: "Approche sans offre précise.",
     ...defaults,
-    body: `Bonjour {{first_name}},
+    body: `Bonjour {{prenom}},
 
-Je suis impressionné par ce que construit {{company_name}}. J'aimerais échanger sur vos enjeux produit / tech.
+Je suis impressionné par ce que construit {{entreprise}}. J'aimerais échanger sur vos enjeux produit / tech.
 
 Seriez-vous disponible pour un café virtuel ?
 
@@ -47,11 +47,11 @@ Merci,`,
     title: "Relance douce",
     description: "Relance 1 après silence.",
     ...defaults,
-    body: `Bonjour {{first_name}},
+    body: `Bonjour {{prenom}},
 
-Je me permets de revenir vers vous concernant {{company_name}}.
+Je me permets de revenir vers vous concernant {{entreprise}}.
 
-Toujours intéressé·e par un échange court autour de {{role}}.
+Toujours intéressé·e par un échange court autour de {{poste}}.
 
 Bonne journée,`,
     ...ts("2026-01-15T09:00:00.000Z"),
@@ -61,9 +61,9 @@ Bonne journée,`,
     title: "Relance avec valeur",
     description: "Relance 2 avec un angle concret.",
     ...defaults,
-    body: `Bonjour {{first_name}},
+    body: `Bonjour {{prenom}},
 
-En préparant mon approche sur {{company_name}}, j'ai noté quelques pistes liées à {{role}}.
+En préparant mon approche sur {{entreprise}}, j'ai noté quelques pistes liées à {{poste}}.
 
 Si utile, je peux vous les partager en 10 minutes.
 
@@ -75,9 +75,9 @@ Si utile, je peux vous les partager en 10 minutes.
     title: "Demande d'intro",
     description: "Demande de mise en relation.",
     ...defaults,
-    body: `Bonjour {{first_name}},
+    body: `Bonjour {{prenom}},
 
-Je cible {{company_name}} pour un rôle {{role}}.
+Je cible {{entreprise}} pour un rôle {{poste}}.
 
 Profil : {{linkedin}}
 
@@ -91,10 +91,10 @@ Merci beaucoup,`,
     title: "Confirmation call",
     description: "Message avant un call prévu.",
     channel: "email",
-    subject: "Échange {{company_name}}",
-    body: `Bonjour {{first_name}} {{last_name}},
+    subject: "Échange {{entreprise}}",
+    body: `Bonjour {{nom_complet}},
 
-Confirmant notre échange au sujet de {{role}} chez {{company_name}} (statut {{status}}).
+Confirmant notre échange au sujet de {{poste}} chez {{entreprise}} (statut {{statut}}).
 
 À tout bientôt,`,
     ...ts("2026-01-22T08:30:00.000Z"),
