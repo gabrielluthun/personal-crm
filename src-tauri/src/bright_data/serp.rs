@@ -24,33 +24,28 @@ struct SerpOrganic {
   description: Option<String>,
 }
 
-/// Google SERP via Bright Data (`format: json` → structured organic results).
+/// Google SERP via Bright Data (`data_format: parsed_light` → organic).
 pub async fn search_google(
   token: &str,
   zone: &str,
   query: &str,
 ) -> Result<Vec<OrganicResult>, AppError> {
   let encoded = urlencoding::encode(query);
-  let target = format!("https://www.google.com/search?q={encoded}&hl=fr&gl=fr&num=20");
+  let target =
+    format!("https://www.google.com/search?q={encoded}&hl=fr&gl=fr&num=20");
   let body = post_request(&http_client()?, token, zone, &target).await?;
   parse_organic(body)
 }
 
 fn parse_organic(body: serde_json::Value) -> Result<Vec<OrganicResult>, AppError> {
-  // Some responses nest the SERP payload; prefer top-level `organic`.
+  // `format: raw` + `data_format: parsed_light` → organic at the top level.
+  // `format: json` wrappers nest the payload in `body`.
   let payload: SerpPayload = if body.get("organic").is_some() {
     serde_json::from_value(body).map_err(|error| {
       AppError::BrightDataParse(format!("SERP JSON invalide: {error}"))
     })?
   } else if let Some(inner) = body.get("body").cloned() {
-    match inner {
-      serde_json::Value::String(raw) => serde_json::from_str(&raw).map_err(|error| {
-        AppError::BrightDataParse(format!("SERP body string invalide: {error}"))
-      })?,
-      other => serde_json::from_value(other).map_err(|error| {
-        AppError::BrightDataParse(format!("SERP body objet invalide: {error}"))
-      })?,
-    }
+    parse_nested_body(inner)?
   } else {
     return Err(AppError::BrightDataParse(
       "Réponse SERP sans résultats organic".into(),
@@ -78,4 +73,26 @@ fn parse_organic(body: serde_json::Value) -> Result<Vec<OrganicResult>, AppError
       })
       .collect(),
   )
+}
+
+fn parse_nested_body(inner: serde_json::Value) -> Result<SerpPayload, AppError> {
+  match inner {
+    serde_json::Value::String(raw) => {
+      let trimmed = raw.trim();
+      if trimmed.is_empty() {
+        return Err(AppError::BrightDataParse(
+          "réponse SERP vide — la zone n’a pas renvoyé de JSON parsé".into(),
+        ));
+      }
+      serde_json::from_str(trimmed).map_err(|error| {
+        AppError::BrightDataParse(format!("SERP body string invalide: {error}"))
+      })
+    }
+    serde_json::Value::Null => Err(AppError::BrightDataParse(
+      "réponse SERP vide — la zone n’a pas renvoyé de JSON parsé".into(),
+    )),
+    other => serde_json::from_value(other).map_err(|error| {
+      AppError::BrightDataParse(format!("SERP body objet invalide: {error}"))
+    }),
+  }
 }
