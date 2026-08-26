@@ -151,7 +151,7 @@ export function TemplateEditor({
       </Button>
 
       <p className="text-xs text-muted-foreground">
-        Exemples : {"{{first_name}}"}, {"{{company_name}}"}.
+        Exemples : {"{{prenom}}"}, {"{{entreprise}}"}, {"{{poste}}"}.
       </p>
     </div>
   );
