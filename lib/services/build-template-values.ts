@@ -1,10 +1,8 @@
 import type { Contact } from "@/lib/domain/contact";
 import { getContactDisplayName } from "@/lib/domain/contact";
 import type { Entreprise } from "@/lib/domain/entreprise";
+import { DEFAULT_FOLLOW_UP_DAYS } from "@/lib/services/contact-follow-up";
 import type { TemplateVariableValues } from "@/lib/services/template-renderer";
-
-/** Suggested delay before a follow-up when no dedicated field exists yet. */
-const DEFAULT_FOLLOW_UP_DAYS = 7;
 
 /**
  * Maps a contact (+ optional company) to template placeholder values.
