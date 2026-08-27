@@ -1,5 +1,7 @@
+import type { JobBoardSource } from "@/lib/domain/job-board-source";
 import type { JobOffer } from "@/lib/domain/job-offer";
 import type { Entreprise } from "@/lib/domain/entreprise";
+import { readCompanySlugFromRaw } from "@/lib/domain/job-board-source-storage";
 
 /** Companies returned per SERP page (aligned with Rust `MAX_COMPANIES`). */
 export const COMPANIES_PER_SEARCH_PAGE = 10;
@@ -7,12 +9,15 @@ export const COMPANIES_PER_SEARCH_PAGE = 10;
 export type CompanyProposition = {
   readonly id: JobOffer["id"];
   readonly companyName: string;
+  readonly companySlug: string;
   readonly location: string;
   readonly activity: string | null;
   readonly websiteUrl: string | null;
   readonly linkedinUrl: string | null;
-  readonly companyWttjUrl: string | null;
-  readonly offerWttjUrl: string;
+  readonly source: JobBoardSource;
+  /** WTTJ company page when available; null for Indeed. */
+  readonly companyBoardUrl: string | null;
+  readonly offerUrl: string;
 };
 
 export type PropositionStats = {
@@ -35,15 +40,7 @@ export function buildCompanyPropositions(
   const knownNames = new Set(
     entreprises.map((entreprise) => normalizeName(entreprise.name)),
   );
-  const knownSlugs = new Set(
-    entreprises
-      .map((entreprise) =>
-        entreprise.wttjUrl
-          ? companySlugFromWttjUrl(entreprise.wttjUrl)
-          : null,
-      )
-      .filter((slug): slug is string => slug !== null),
-  );
+  const knownSlugs = new Set(crmCompanySlugs(entreprises));
   const seen = new Set<string>();
   const propositions: CompanyProposition[] = [];
 
@@ -62,12 +59,14 @@ export function buildCompanyPropositions(
     propositions.push({
       id: offer.id,
       companyName: offer.companyName,
+      companySlug: offer.companySlug,
       location: offer.location,
       activity: offer.descriptionSnippet,
       websiteUrl: offer.companyWebsiteUrl,
       linkedinUrl: offer.companyLinkedinUrl,
-      companyWttjUrl: companyPageFromOfferUrl(offer.wttjUrl),
-      offerWttjUrl: offer.wttjUrl,
+      source: offer.source,
+      companyBoardUrl: companyPageFromOfferUrl(offer.offerUrl),
+      offerUrl: offer.offerUrl,
     });
   }
 
@@ -100,21 +99,33 @@ export function crmSearchExclusions(entreprises: readonly Entreprise[]): {
   readonly excludeSlugs: readonly string[];
   readonly excludeNames: readonly string[];
 } {
-  const excludeSlugs: string[] = [];
+  const excludeSlugs = crmCompanySlugs(entreprises);
   const excludeNames: string[] = [];
   for (const entreprise of entreprises) {
-    const slug = entreprise.wttjUrl
-      ? companySlugFromWttjUrl(entreprise.wttjUrl)
-      : null;
-    if (slug !== null) {
-      excludeSlugs.push(slug);
-    }
     const name = entreprise.name.trim();
     if (name.length > 0) {
       excludeNames.push(name);
     }
   }
   return { excludeSlugs, excludeNames };
+}
+
+function crmCompanySlugs(entreprises: readonly Entreprise[]): string[] {
+  const slugs: string[] = [];
+  for (const entreprise of entreprises) {
+    const fromRaw = readCompanySlugFromRaw(entreprise.rawData);
+    if (fromRaw !== null) {
+      slugs.push(fromRaw);
+      continue;
+    }
+    if (entreprise.wttjUrl) {
+      const fromWttj = companySlugFromWttjUrl(entreprise.wttjUrl);
+      if (fromWttj !== null) {
+        slugs.push(fromWttj);
+      }
+    }
+  }
+  return slugs;
 }
 
 function normalizeName(value: string): string {
