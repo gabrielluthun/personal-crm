@@ -19,7 +19,7 @@ import type { Entreprise, EntrepriseId } from "@/lib/domain/entreprise";
 const DEFAULT_URL_FILTERS: EntrepriseUrlFilters = {
   linkedin: "all",
   website: "all",
-  wttj: "all",
+  source: "all",
 };
 
 export default function EntreprisePage() {
