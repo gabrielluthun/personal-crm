@@ -27,6 +27,7 @@ impl JobHit {
       id: self.id,
       title: self.title,
       company_name: self.company_name,
+      company_slug: self.company_slug,
       location: self.location,
       contract_type: self.contract_type,
       wttj_url: self.wttj_url,
