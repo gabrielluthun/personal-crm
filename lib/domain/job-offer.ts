@@ -18,6 +18,8 @@ export type JobOffer = {
   readonly id: JobOfferId;
   readonly title: string;
   readonly companyName: string;
+  /** WTTJ URL slug — stable company identity for pagination dedup. */
+  readonly companySlug: string;
   readonly location: string;
   readonly contractType: JobContractType;
   readonly wttjUrl: string;
@@ -31,4 +33,10 @@ export type JobSearchQuery = {
   readonly keywords: string;
   readonly location?: string;
   readonly contractType?: JobContractType | null;
+  /** 1-based SERP page (Google `start = (page - 1) * 20`). */
+  readonly page?: number;
+  /** WTTJ slugs already seen this session or already in the CRM. */
+  readonly excludeSlugs?: readonly string[];
+  /** Company names already in the CRM (fallback without WTTJ URL). */
+  readonly excludeNames?: readonly string[];
 };
