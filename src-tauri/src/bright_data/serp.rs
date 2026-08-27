@@ -25,14 +25,19 @@ struct SerpOrganic {
 }
 
 /// Google SERP via Bright Data (`data_format: parsed_light` → organic).
+/// `start` is Google's result offset (`0`, `20`, `40`, …).
 pub async fn search_google(
   token: &str,
   zone: &str,
   query: &str,
+  start: u32,
 ) -> Result<Vec<OrganicResult>, AppError> {
   let encoded = urlencoding::encode(query);
-  let target =
+  let mut target =
     format!("https://www.google.com/search?q={encoded}&hl=fr&gl=fr&num=20");
+  if start > 0 {
+    target.push_str(&format!("&start={start}"));
+  }
   let body = post_request(&http_client()?, token, zone, &target).await?;
   parse_organic(body)
 }

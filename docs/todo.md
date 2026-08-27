@@ -55,9 +55,9 @@ SERP qui répond vide (cas du 27 août : requêtes > 0, BW = 0).
 
 ### B — Volume WTTJ
 
-- [ ] Pagination (« page suivante », ~10 entreprises nouvelles)
-- [ ] Dédup session (pages déjà vues)
-- [ ] Dédup avec les entreprises déjà en base
+- [x] Pagination (« page suivante », ~10 entreprises nouvelles)
+- [x] Dédup session (pages déjà vues)
+- [x] Dédup avec les entreprises déjà en base
 - [ ] Badge / champ `source` sur proposition + à l’import
 
 ### C — Source alternative (ensuite, toujours 1 à la fois)
@@ -110,8 +110,8 @@ multi-sources ni raisonnement libre.
 
 ## Prochain sprint concret (ordre d’exécution)
 
-1. Merger `feat/follow-up-pipeline` → `develop` si besoin
+1. ~~Merger `feat/follow-up-pipeline` → `develop`~~ ✅
 2. **Probe SERP réel** (Settings)
-3. **Pagination WTTJ + dédup + badge source**
-4. Indeed en sélecteur (1 source à la fois)
+3. ~~Pagination WTTJ + dédup~~ ✅ (branche `feat/job-search-pagination`)
+4. Badge `source` puis Indeed en sélecteur (1 source à la fois)
 5. Puis seulement : lecture bornée de fiches
