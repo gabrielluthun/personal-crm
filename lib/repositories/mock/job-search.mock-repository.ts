@@ -23,6 +23,7 @@ export class MockJobSearchRepository implements JobSearchPort {
       (query.excludeNames ?? []).map((name) => name.trim().toLowerCase()),
     );
 
+    const source = query.source ?? "wttj";
     const filtered = MOCK_JOB_OFFERS.filter((offer) => {
       const matchesKeywords =
         keywords.length === 0 ||
@@ -38,13 +39,17 @@ export class MockJobSearchRepository implements JobSearchPort {
       const matchesContract =
         !query.contractType || offer.contractType === query.contractType;
 
+      const matchesSource = offer.source === source;
+
       const slug = offer.companySlug.toLowerCase();
       const name = offer.companyName.trim().toLowerCase();
       if (excludedSlugs.has(slug) || excludedNames.has(name)) {
         return false;
       }
 
-      return matchesKeywords && matchesLocation && matchesContract;
+      return (
+        matchesKeywords && matchesLocation && matchesContract && matchesSource
+      );
     });
 
     const seen = new Set<string>();

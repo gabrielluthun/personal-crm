@@ -4,9 +4,11 @@ import { GlobeIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
+import { JobBoardSourceBadge } from "@/components/dashboard/job-board-source-badge";
 import { SelectionCheckbox } from "@/components/data-table/selection-checkbox";
 import { Button } from "@/components/ui/button";
 import type { CompanyProposition } from "@/lib/dashboard/company-propositions";
+import { jobBoardSourceLabel } from "@/lib/domain/job-board-source";
 import { openExternal } from "@/lib/tauri/open-external";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +25,9 @@ export function CompanyPropositionCard({
   selected,
   onSelectedChange,
 }: CompanyPropositionCardProps) {
+  const boardLabel = jobBoardSourceLabel(proposition.source);
+  const boardShort = proposition.source === "wttj" ? "WTTJ" : "Indeed";
+
   return (
     <article
       className={cn(
@@ -38,9 +43,12 @@ export function CompanyPropositionCard({
           onCheckedChange={onSelectedChange}
         />
         <div className="min-w-0 flex-1 space-y-3">
-          <h3 className="text-base font-semibold leading-snug text-foreground">
-            {proposition.companyName}
-          </h3>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-base font-semibold leading-snug text-foreground">
+              {proposition.companyName}
+            </h3>
+            <JobBoardSourceBadge source={proposition.source} />
+          </div>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
             <ResultLink
@@ -55,12 +63,17 @@ export function CompanyPropositionCard({
               missingLabel="LinkedIn non détecté"
             />
             <ResultLink
-              href={proposition.companyWttjUrl}
-              label="Welcome to the Jungle"
-              icon={<WttjMark />}
-              missingLabel="WTTJ non détecté"
+              href={proposition.companyBoardUrl}
+              label={boardLabel}
+              icon={
+                proposition.source === "wttj" ? <WttjMark /> : undefined
+              }
+              missingLabel={`${boardShort} non détecté`}
             />
-            <ResultLink href={proposition.offerWttjUrl} label="Offre WTTJ" />
+            <ResultLink
+              href={proposition.offerUrl}
+              label={`Offre ${boardShort}`}
+            />
           </div>
 
           {proposition.activity ? (

@@ -10,6 +10,7 @@ const ts = (iso: string) => ({
 const scrapeDefaults = {
   location: null,
   targetOfferUrl: null,
+  source: "wttj" as const,
   rawData: null,
   scrapedAt: null,
 } as const;

@@ -6,19 +6,26 @@ pub struct JobSearchQueryDto {
   pub keywords: String,
   pub location: Option<String>,
   pub contract_type: Option<String>,
+  /// `wttj` (default) or `indeed` — one board per search.
+  #[serde(default = "default_source")]
+  pub source: String,
   /// 1-based Google SERP page (each page uses `start = (page - 1) * 20`).
   #[serde(default = "default_page")]
   pub page: u32,
-  /// WTTJ company slugs already shown this session (or already in the CRM).
+  /// Company slugs already shown this session (or already in the CRM).
   #[serde(default)]
   pub exclude_slugs: Vec<String>,
-  /// Normalized company names already in the CRM (fallback without WTTJ URL).
+  /// Normalized company names already in the CRM (fallback without board URL).
   #[serde(default)]
   pub exclude_names: Vec<String>,
 }
 
 fn default_page() -> u32 {
   1
+}
+
+fn default_source() -> String {
+  "wttj".into()
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -30,7 +37,8 @@ pub struct JobOfferDto {
   pub company_slug: String,
   pub location: String,
   pub contract_type: String,
-  pub wttj_url: String,
+  pub source: String,
+  pub offer_url: String,
   pub company_website_url: Option<String>,
   pub company_linkedin_url: Option<String>,
   pub published_at: Option<String>,

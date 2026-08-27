@@ -3,6 +3,7 @@ import type { ContactStatus } from "@/lib/domain/contact-status";
 import { isContactStatus } from "@/lib/domain/contact-status";
 import type { Entreprise } from "@/lib/domain/entreprise";
 import type { Interaction } from "@/lib/domain/interaction";
+import { readJobBoardSourceFromRaw } from "@/lib/domain/job-board-source-storage";
 import type { JsonValue } from "@/lib/domain/shared/json";
 import { createId } from "@/lib/domain/shared/id";
 import {
@@ -35,6 +36,7 @@ function mapIso(value: string): IsoDateTime {
 }
 
 export function mapEntrepriseRow(row: EntrepriseRow): Entreprise {
+  const rawData = mapJson(row.raw_data);
   return {
     id: createId<"Entreprise">(row.id),
     name: row.name,
@@ -44,7 +46,8 @@ export function mapEntrepriseRow(row: EntrepriseRow): Entreprise {
     location: row.location,
     targetOfferUrl: row.target_offer_url,
     notes: row.notes,
-    rawData: mapJson(row.raw_data),
+    source: readJobBoardSourceFromRaw(rawData),
+    rawData,
     scrapedAt: row.scraped_at ? mapIso(row.scraped_at) : null,
     createdAt: mapIso(row.created_at),
     updatedAt: mapIso(row.updated_at),

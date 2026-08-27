@@ -4,7 +4,8 @@ use tokio::task::JoinSet;
 
 use crate::bright_data::{read_api_token, resolve_serp_zone, search_google};
 use crate::error::AppError;
-use crate::job_search_map::{map_job_hit, pick_linkedin_url, pick_website_url};
+use crate::job_search_indeed::map_indeed_hit;
+use crate::job_search_map::{map_wttj_hit, pick_linkedin_url, pick_website_url, JobHit};
 use crate::models::{JobOfferDto, JobSearchQueryDto};
 
 const MAX_COMPANIES: usize = 10;
@@ -12,7 +13,7 @@ const SERP_PAGE_SIZE: u32 = 20;
 
 /**
  * Dashboard job search — Bright Data SERP pipeline:
- * 1. Google SERP for Welcome to the Jungle job URLs (`page` → `start=`)
+ * 1. Google SERP for the selected board (WTTJ or Indeed)
  * 2. Skip excluded slugs/names; keep up to 10 new unique companies
  * 3–4. Enrich website + LinkedIn via SERP (best-effort, parallel)
  *
@@ -34,7 +35,8 @@ pub async fn search_jobs(query: JobSearchQueryDto) -> Result<Vec<JobOfferDto>, A
     .map(|value| value.trim())
     .filter(|value| !value.is_empty());
 
-  let mut job_query = format!("{keywords} site:welcometothejungle.com/fr/companies");
+  let source = normalize_source(&query.source);
+  let mut job_query = board_serp_query(keywords, source);
   if let Some(city) = location {
     job_query.push(' ');
     job_query.push_str(city);
@@ -56,9 +58,14 @@ pub async fn search_jobs(query: JobSearchQueryDto) -> Result<Vec<JobOfferDto>, A
     .collect();
 
   let organic = search_google(&token, &zone, &job_query, start).await?;
+  let contract = query.contract_type.as_deref();
+  let fallback = location.unwrap_or("");
   let hits: Vec<_> = organic
     .into_iter()
-    .filter_map(|row| map_job_hit(&row, location.unwrap_or(""), query.contract_type.as_deref()))
+    .filter_map(|row| match source {
+      "indeed" => map_indeed_hit(&row, fallback, contract),
+      _ => map_wttj_hit(&row, fallback, contract),
+    })
     .collect();
 
   let mut allowed_slugs = HashSet::new();
@@ -99,6 +106,22 @@ pub async fn search_jobs(query: JobSearchQueryDto) -> Result<Vec<JobOfferDto>, A
   )
 }
 
+fn normalize_source(value: &str) -> &str {
+  if value.trim().eq_ignore_ascii_case("indeed") {
+    "indeed"
+  } else {
+    "wttj"
+  }
+}
+
+fn board_serp_query(keywords: &str, source: &str) -> String {
+  if source == "indeed" {
+    format!("{keywords} (site:indeed.fr OR site:fr.indeed.com) viewjob")
+  } else {
+    format!("{keywords} site:welcometothejungle.com/fr/companies")
+  }
+}
+
 fn normalize_name(value: &str) -> String {
   value.trim().to_lowercase()
 }
@@ -107,7 +130,7 @@ async fn enrich_companies(
   token: &str,
   zone: &str,
   slugs: &[String],
-  selected: &[crate::job_search_map::JobHit],
+  selected: &[JobHit],
 ) -> HashMap<String, (Option<String>, Option<String>)> {
   let mut set = JoinSet::new();
 
@@ -136,7 +159,7 @@ async fn enrich_companies(
         &token,
         &zone,
         &format!(
-          "\"{company_name}\" site officiel -linkedin.com -welcometothejungle.com -losc.fr"
+          "\"{company_name}\" site officiel -linkedin.com -welcometothejungle.com -indeed.com -indeed.fr -losc.fr"
         ),
         0,
       )
