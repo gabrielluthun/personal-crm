@@ -130,6 +130,12 @@ export function ContactEditSheet({
                 templates={send.templates}
                 templatesLoading={send.templatesLoading}
                 selectedTemplate={send.selectedTemplate}
+                suggestedHint={
+                  send.suggestedTemplateId !== null &&
+                  send.selectedTemplate?.id === send.suggestedTemplateId
+                    ? "Template suggéré pour ce statut"
+                    : null
+                }
                 preview={send.preview}
                 missingLabel={send.missingLabel}
                 isRecording={send.isRecording}
