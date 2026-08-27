@@ -7,6 +7,11 @@ import {
   HeaderSelectionCheckbox,
   SelectionCheckbox,
 } from "@/components/data-table/selection-checkbox";
+import { JobBoardSourceMark } from "@/components/dashboard/job-board-source-mark";
+import {
+  SourceFilterControl,
+  type SourceFilter,
+} from "@/components/entreprise/source-filter";
 import { UrlIconLink } from "@/components/entreprise/url-icon-link";
 import {
   UrlPresenceFilterControl,
@@ -15,11 +20,16 @@ import {
 } from "@/components/entreprise/url-presence-filter";
 import type { HeaderSelectionState } from "@/hooks/use-row-selection";
 import type { Entreprise, EntrepriseId } from "@/lib/domain/entreprise";
+import {
+  boardUrlForEntreprise,
+  resolveEntrepriseSource,
+} from "@/lib/domain/entreprise-source";
+import { jobBoardSourceLabel } from "@/lib/domain/job-board-source";
 
 export type EntrepriseUrlFilters = {
   readonly linkedin: UrlPresenceFilter;
   readonly website: UrlPresenceFilter;
-  readonly wttj: UrlPresenceFilter;
+  readonly source: SourceFilter;
 };
 
 type EntrepriseColumnsOptions = {
@@ -103,27 +113,36 @@ export function createEntrepriseColumns(
       ),
     },
     {
-      id: "wttj",
+      id: "source",
       headerClassName: "w-28",
       className: "w-28",
       header: (
-        <UrlPresenceFilterControl
-          label="WTTJ"
-          value={urlFilters.wttj}
-          onChange={(wttj) => {
-            onUrlFiltersChange({ ...urlFilters, wttj });
+        <SourceFilterControl
+          value={urlFilters.source}
+          onChange={(source) => {
+            onUrlFiltersChange({ ...urlFilters, source });
           }}
         />
       ),
-      cell: (row) => (
-        <UrlIconLink href={row.wttjUrl} label="Welcome to the Jungle">
-          <span className="text-xs font-semibold" aria-hidden>
-            W
-          </span>
-        </UrlIconLink>
-      ),
+      cell: (row) => <SourceCell entreprise={row} />,
     },
   ];
+}
+
+function SourceCell({ entreprise }: { readonly entreprise: Entreprise }) {
+  const source = resolveEntrepriseSource(entreprise);
+  if (source === null) {
+    return <span className="text-xs text-muted-foreground">—</span>;
+  }
+
+  return (
+    <UrlIconLink
+      href={boardUrlForEntreprise(entreprise)}
+      label={`Offre ${jobBoardSourceLabel(source)}`}
+    >
+      <JobBoardSourceMark source={source} />
+    </UrlIconLink>
+  );
 }
 
 function LinkedInMark() {
@@ -150,7 +169,10 @@ export function filterEntreprisesByUrlPresence(
     if (filters.website === "with" && !hasUrl(item.websiteUrl)) {
       return false;
     }
-    if (filters.wttj === "with" && !hasUrl(item.wttjUrl)) {
+    if (
+      filters.source !== "all" &&
+      resolveEntrepriseSource(item) !== filters.source
+    ) {
       return false;
     }
     return true;
