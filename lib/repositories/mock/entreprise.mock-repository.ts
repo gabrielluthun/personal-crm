@@ -5,6 +5,7 @@ import type {
   EntrepriseUpdateInput,
 } from "@/lib/domain/entreprise";
 import { MOCK_ENTREPRISES } from "@/lib/data/mocks/entreprises.mock";
+import { writeJobBoardMetaToRaw } from "@/lib/domain/job-board-source-storage";
 import { notFoundError } from "@/lib/domain/shared/errors";
 import { generateId } from "@/lib/domain/shared/id";
 import { err, ok } from "@/lib/domain/shared/result";
@@ -54,6 +55,7 @@ export class MockEntrepriseRepository implements EntreprisePort {
 
   async create(input: EntrepriseCreateInput) {
     const timestamps = createTimestamps();
+    const source = input.source ?? null;
     const created: Entreprise = {
       id: generateId<"Entreprise">(),
       name: input.name.trim(),
@@ -63,7 +65,8 @@ export class MockEntrepriseRepository implements EntreprisePort {
       location: input.location ?? null,
       targetOfferUrl: input.targetOfferUrl ?? null,
       notes: input.notes ?? null,
-      rawData: input.rawData ?? null,
+      source,
+      rawData: writeJobBoardMetaToRaw(input.rawData ?? null, { source }),
       scrapedAt: input.scrapedAt ?? null,
       ...timestamps,
     };
@@ -75,6 +78,10 @@ export class MockEntrepriseRepository implements EntreprisePort {
     if (!current) {
       return err(notFoundError("Entreprise", id));
     }
+    const source =
+      input.source === undefined ? current.source : input.source;
+    const rawDataBase =
+      input.rawData === undefined ? current.rawData : input.rawData;
     const updated: Entreprise = {
       ...current,
       name: input.name?.trim() ?? current.name,
@@ -89,7 +96,8 @@ export class MockEntrepriseRepository implements EntreprisePort {
           ? current.targetOfferUrl
           : input.targetOfferUrl,
       notes: input.notes === undefined ? current.notes : input.notes,
-      rawData: input.rawData === undefined ? current.rawData : input.rawData,
+      source,
+      rawData: writeJobBoardMetaToRaw(rawDataBase, { source }),
       scrapedAt:
         input.scrapedAt === undefined ? current.scrapedAt : input.scrapedAt,
       ...touchUpdatedAt(current),
