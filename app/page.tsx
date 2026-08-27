@@ -17,6 +17,7 @@ import {
   formatPropositionStatus,
   formatRecruitmentContext,
 } from "@/lib/dashboard/company-propositions";
+import { writeJobBoardMetaToRaw } from "@/lib/domain/job-board-source-storage";
 import type { JobOfferId, JobSearchQuery } from "@/lib/domain/job-offer";
 import { countDueForFollowUp } from "@/lib/services/contact-follow-up";
 
@@ -78,9 +79,17 @@ export default function DashboardPage() {
         name: item.companyName,
         websiteUrl: item.websiteUrl,
         linkedinUrl: item.linkedinUrl,
-        wttjUrl: item.companyWttjUrl ?? item.offerWttjUrl,
+        wttjUrl:
+          item.source === "wttj"
+            ? (item.companyBoardUrl ?? item.offerUrl)
+            : null,
         location: item.location,
-        targetOfferUrl: item.offerWttjUrl,
+        targetOfferUrl: item.offerUrl,
+        source: item.source,
+        rawData: writeJobBoardMetaToRaw(null, {
+          source: item.source,
+          companySlug: item.companySlug,
+        }),
       });
       if (result.ok) {
         created += 1;
@@ -105,7 +114,7 @@ export default function DashboardPage() {
     <div className="flex min-h-0 flex-1 flex-col">
       <PageHeader
         title="Dashboard"
-        description="Découvrez des entreprises sur Welcome to the Jungle qui recrutent dans un domaine donné — sans les ajouter automatiquement."
+        description="Découvrez des entreprises qui recrutent (Welcome to the Jungle ou Indeed) — sans les ajouter automatiquement."
       />
       <div className="flex min-h-0 flex-1 flex-col gap-6 px-4 py-4 sm:px-6 md:px-8">
         <FollowUpReminder count={followUpCount} />
