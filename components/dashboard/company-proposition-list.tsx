@@ -12,9 +12,12 @@ type CompanyPropositionListProps = {
   readonly recruitmentContext: string;
   readonly isLoading: boolean;
   readonly isIdle: boolean;
+  readonly canLoadMore?: boolean;
+  readonly isLoadingMore?: boolean;
   readonly selection: RowSelection<JobOfferId>;
   readonly isImporting?: boolean;
   readonly onImport: () => void;
+  readonly onLoadMore?: () => void;
 };
 
 export function CompanyPropositionList({
@@ -22,9 +25,12 @@ export function CompanyPropositionList({
   recruitmentContext,
   isLoading,
   isIdle,
+  canLoadMore = false,
+  isLoadingMore = false,
   selection,
   isImporting = false,
   onImport,
+  onLoadMore,
 }: CompanyPropositionListProps) {
   return (
     <section className="flex min-h-0 flex-1 flex-col gap-3" aria-labelledby="resultats-title">
@@ -92,6 +98,19 @@ export function CompanyPropositionList({
             </li>
           ))}
         </ul>
+      ) : null}
+
+      {canLoadMore && onLoadMore !== undefined ? (
+        <div className="flex justify-center pt-1">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isLoading || isLoadingMore}
+            onClick={onLoadMore}
+          >
+            {isLoadingMore ? "Chargement…" : "Page suivante"}
+          </Button>
+        </div>
       ) : null}
     </section>
   );
