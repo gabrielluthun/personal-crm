@@ -23,6 +23,15 @@ export type {
   EntrepriseUpdateInput,
 } from "@/lib/domain/entreprise";
 
+export {
+  DEFAULT_JOB_BOARD_SOURCE,
+  JOB_BOARD_SOURCES,
+  JOB_BOARD_SOURCE_LABELS,
+  isJobBoardSource,
+  jobBoardSourceLabel,
+  type JobBoardSource,
+} from "@/lib/domain/job-board-source";
+
 export type {
   JobContractType,
   JobOffer,
