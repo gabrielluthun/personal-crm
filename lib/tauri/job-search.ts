@@ -24,6 +24,7 @@ export async function searchJobs(
         keywords: query.keywords,
         location: query.location ?? null,
         contractType: query.contractType ?? null,
+        source: query.source ?? "wttj",
         page: query.page ?? 1,
         excludeSlugs: [...(query.excludeSlugs ?? [])],
         excludeNames: [...(query.excludeNames ?? [])],
