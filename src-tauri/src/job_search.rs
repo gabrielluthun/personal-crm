@@ -8,12 +8,13 @@ use crate::job_search_map::{map_job_hit, pick_linkedin_url, pick_website_url};
 use crate::models::{JobOfferDto, JobSearchQueryDto};
 
 const MAX_COMPANIES: usize = 10;
+const SERP_PAGE_SIZE: u32 = 20;
 
 /**
- * Dashboard job search — Bright Data SERP pipeline (steps 1–4):
- * 1. Google SERP for Welcome to the Jungle job URLs
- * 2. Keep offers for the first 10 unique companies
- * 3–4. Enrich website + LinkedIn company page via SERP (best-effort, parallel)
+ * Dashboard job search — Bright Data SERP pipeline:
+ * 1. Google SERP for Welcome to the Jungle job URLs (`page` → `start=`)
+ * 2. Skip excluded slugs/names; keep up to 10 new unique companies
+ * 3–4. Enrich website + LinkedIn via SERP (best-effort, parallel)
  *
  * Token never leaves Rust / the OS keychain.
  */
@@ -39,7 +40,22 @@ pub async fn search_jobs(query: JobSearchQueryDto) -> Result<Vec<JobOfferDto>, A
     job_query.push_str(city);
   }
 
-  let organic = search_google(&token, &zone, &job_query).await?;
+  let page = query.page.max(1);
+  let start = (page - 1).saturating_mul(SERP_PAGE_SIZE);
+  let excluded_slugs: HashSet<String> = query
+    .exclude_slugs
+    .into_iter()
+    .map(|slug| slug.trim().to_lowercase())
+    .filter(|slug| !slug.is_empty())
+    .collect();
+  let excluded_names: HashSet<String> = query
+    .exclude_names
+    .into_iter()
+    .map(|name| normalize_name(&name))
+    .filter(|name| !name.is_empty())
+    .collect();
+
+  let organic = search_google(&token, &zone, &job_query, start).await?;
   let hits: Vec<_> = organic
     .into_iter()
     .filter_map(|row| map_job_hit(&row, location.unwrap_or(""), query.contract_type.as_deref()))
@@ -50,6 +66,13 @@ pub async fn search_jobs(query: JobSearchQueryDto) -> Result<Vec<JobOfferDto>, A
   let mut selected = Vec::new();
 
   for hit in hits {
+    let slug_key = hit.company_slug.to_lowercase();
+    if excluded_slugs.contains(&slug_key) {
+      continue;
+    }
+    if excluded_names.contains(&normalize_name(&hit.company_name)) {
+      continue;
+    }
     if !allowed_slugs.contains(&hit.company_slug) {
       if ordered_slugs.len() >= MAX_COMPANIES {
         continue;
@@ -76,6 +99,10 @@ pub async fn search_jobs(query: JobSearchQueryDto) -> Result<Vec<JobOfferDto>, A
   )
 }
 
+fn normalize_name(value: &str) -> String {
+  value.trim().to_lowercase()
+}
+
 async fn enrich_companies(
   token: &str,
   zone: &str,
@@ -99,6 +126,7 @@ async fn enrich_companies(
         &token,
         &zone,
         &format!("\"{company_name}\" OR {slug} site:linkedin.com/company"),
+        0,
       )
       .await
       .ok()
@@ -107,7 +135,10 @@ async fn enrich_companies(
       let website = search_google(
         &token,
         &zone,
-        &format!("\"{company_name}\" site officiel -linkedin.com -welcometothejungle.com -losc.fr"),
+        &format!(
+          "\"{company_name}\" site officiel -linkedin.com -welcometothejungle.com -losc.fr"
+        ),
+        0,
       )
       .await
       .ok()
