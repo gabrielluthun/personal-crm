@@ -1,4 +1,5 @@
 import type { ContactStatus } from "@/lib/domain/contact-status";
+import { suggestNextStatus } from "@/lib/services/contact-follow-up";
 
 /** Calendar date `YYYY-MM-DD` in the local timezone. */
 export function todayCalendarDate(now: Date = new Date()): string {
@@ -9,14 +10,18 @@ export function todayCalendarDate(now: Date = new Date()): string {
 }
 
 /**
- * After a first outbound message, move "À contacter" → "Contacté".
- * Other statuses stay untouched.
+ * Status progression after an outbound message is recorded.
+ * Delegates to the follow-up pipeline rules.
  */
+export function statusAfterOutboundSend(
+  status: ContactStatus,
+): ContactStatus | null {
+  return suggestNextStatus(status);
+}
+
+/** @deprecated Prefer `statusAfterOutboundSend`. */
 export function statusAfterFirstSend(
   status: ContactStatus,
 ): ContactStatus | null {
-  if (status === "À contacter") {
-    return "Contacté";
-  }
-  return null;
+  return statusAfterOutboundSend(status);
 }
