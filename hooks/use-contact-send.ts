@@ -15,8 +15,9 @@ import type { DomainError } from "@/lib/domain/shared/errors";
 import { validationError } from "@/lib/domain/shared/errors";
 import { err, ok, type Result } from "@/lib/domain/shared/result";
 import type { MessageTemplate, TemplateId } from "@/lib/domain/template";
+import { suggestTemplateId } from "@/lib/services/contact-follow-up";
 import {
-  statusAfterFirstSend,
+  statusAfterOutboundSend,
   todayCalendarDate,
 } from "@/lib/services/contact-send";
 import {
@@ -73,8 +74,13 @@ export function useContactSend({
   );
 
   const items: readonly MessageTemplate[] = templateList.data?.items ?? [];
+  const suggestedTemplateId =
+    contact !== null ? suggestTemplateId(contact.status, items) : null;
   const selected =
-    items.find((item) => item.id === templateId) ?? items[0] ?? null;
+    items.find((item) => item.id === templateId) ??
+    items.find((item) => item.id === suggestedTemplateId) ??
+    items[0] ??
+    null;
   const companyReady =
     contact === null ||
     contact.entrepriseId === null ||
@@ -132,7 +138,7 @@ export function useContactSend({
       return created;
     }
 
-    const nextStatus = statusAfterFirstSend(contact.status);
+    const nextStatus = statusAfterOutboundSend(contact.status);
     const patch: ContactUpdateInput = {
       lastMessageSentAt: todayCalendarDate(),
       ...(nextStatus !== null ? { status: nextStatus } : {}),
@@ -155,6 +161,7 @@ export function useContactSend({
     templates: items,
     templatesLoading: templateList.isLoading,
     selectedTemplate: selected,
+    suggestedTemplateId,
     selectTemplate,
     preview,
     missingLabel:
