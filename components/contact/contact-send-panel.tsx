@@ -17,6 +17,7 @@ type ContactSendPanelProps = {
   readonly templates: readonly MessageTemplate[];
   readonly templatesLoading: boolean;
   readonly selectedTemplate: MessageTemplate | null;
+  readonly suggestedHint: string | null;
   readonly preview: ContactSendPreview | null;
   readonly missingLabel: string | null;
   readonly isRecording: boolean;
@@ -30,6 +31,7 @@ export function ContactSendPanel({
   templates,
   templatesLoading,
   selectedTemplate,
+  suggestedHint,
   preview,
   missingLabel,
   isRecording,
@@ -79,6 +81,9 @@ export function ContactSendPanel({
           <p className="text-xs text-muted-foreground">
             Aucun template — créez-en un dans l’onglet Templates.
           </p>
+        ) : null}
+        {suggestedHint !== null ? (
+          <p className="text-xs text-muted-foreground">{suggestedHint}</p>
         ) : null}
       </div>
 
