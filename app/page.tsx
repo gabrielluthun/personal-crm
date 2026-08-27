@@ -13,6 +13,7 @@ import { useJobSearch } from "@/hooks/use-job-search";
 import { useRowSelection } from "@/hooks/use-row-selection";
 import {
   buildCompanyPropositions,
+  crmSearchExclusions,
   formatPropositionStatus,
   formatRecruitmentContext,
 } from "@/lib/dashboard/company-propositions";
@@ -26,6 +27,7 @@ export default function DashboardPage() {
   const selection = useRowSelection<JobOfferId>();
   const [isImporting, setIsImporting] = useState(false);
   const followUpCount = countDueForFollowUp(contacts);
+  const exclusions = crmSearchExclusions(entreprises);
 
   const { propositions, stats } = buildCompanyPropositions(
     jobSearch.offers,
@@ -44,7 +46,17 @@ export default function DashboardPage() {
 
   async function handleSearch(query: JobSearchQuery): Promise<void> {
     selection.clear();
-    const result = await jobSearch.search(query);
+    const result = await jobSearch.search(query, exclusions);
+    if (!result.ok) {
+      toast.error(result.error.message);
+    }
+  }
+
+  async function handleLoadMore(): Promise<void> {
+    const result = await jobSearch.searchNext();
+    if (result === null) {
+      return;
+    }
     if (!result.ok) {
       toast.error(result.error.message);
     }
@@ -98,7 +110,7 @@ export default function DashboardPage() {
       <div className="flex min-h-0 flex-1 flex-col gap-6 px-4 py-4 sm:px-6 md:px-8">
         <FollowUpReminder count={followUpCount} />
         <JobSearchForm
-          isLoading={jobSearch.isLoading}
+          isLoading={jobSearch.isLoading && jobSearch.offers.length === 0}
           statusText={statusText}
           onSubmit={(query) => {
             void handleSearch(query);
@@ -113,12 +125,17 @@ export default function DashboardPage() {
           <CompanyPropositionList
             propositions={propositions}
             recruitmentContext={recruitmentContext}
-            isLoading={jobSearch.isLoading}
+            isLoading={jobSearch.isLoading && jobSearch.offers.length === 0}
+            isLoadingMore={jobSearch.isLoading && jobSearch.offers.length > 0}
             isIdle={jobSearch.isIdle}
+            canLoadMore={jobSearch.canLoadMore}
             selection={selection}
             isImporting={isImporting}
             onImport={() => {
               void handleImport();
+            }}
+            onLoadMore={() => {
+              void handleLoadMore();
             }}
           />
         </div>
