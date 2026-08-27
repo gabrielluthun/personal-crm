@@ -1,18 +1,27 @@
 use crate::bright_data::OrganicResult;
+use crate::job_search_indeed_company::company_from_indeed_snippet;
+use crate::job_search_indeed_title::{is_location_label, parse_indeed_title};
 use crate::job_search_map::{short_hash, slugify_company, JobHit};
 
 /// Maps Google SERP rows that point at Indeed job pages.
+/// Company comes from the snippet — never from a trailing title segment.
 pub fn map_indeed_hit(
   row: &OrganicResult,
   fallback_location: &str,
   wanted_contract: Option<&str>,
 ) -> Option<JobHit> {
-  if !is_indeed_job_url(&row.link) {
+  if !is_indeed_viewjob_url(&row.link) {
     return None;
   }
 
-  let (title, company_name, contract) = parse_indeed_title(&row.title);
-  if company_name.is_empty() {
+  let (title, mut location, contract) = parse_indeed_title(&row.title);
+  let company_name = row
+    .description
+    .as_deref()
+    .and_then(company_from_indeed_snippet)
+    .or_else(|| company_from_cmp_url(&row.link))?;
+
+  if is_location_label(&company_name) {
     return None;
   }
 
@@ -27,12 +36,16 @@ pub fn map_indeed_hit(
     return None;
   }
 
+  if location.is_empty() {
+    location = fallback_location.to_string();
+  }
+
   Some(JobHit {
     id: format!("indeed_{slug}_{}", short_hash(&row.link)),
     title,
     company_name,
     company_slug: slug,
-    location: fallback_location.to_string(),
+    location,
     contract_type: if contract.is_empty() {
       "Autre".into()
     } else {
@@ -44,7 +57,7 @@ pub fn map_indeed_hit(
   })
 }
 
-fn is_indeed_job_url(url: &str) -> bool {
+fn is_indeed_viewjob_url(url: &str) -> bool {
   let lower = url.to_lowercase();
   let host_ok = lower.contains("indeed.fr")
     || lower.contains("indeed.com")
@@ -52,57 +65,28 @@ fn is_indeed_job_url(url: &str) -> bool {
   if !host_ok {
     return false;
   }
+  // Skip listing pages (`/q-…-emplois.html`).
   lower.contains("/viewjob")
     || lower.contains("jk=")
     || lower.contains("/rc/clk")
     || lower.contains("/pagead/clk")
 }
 
-fn parse_indeed_title(raw: &str) -> (String, String, String) {
-  let mut cleaned = raw.trim().to_string();
-  for suffix in [
-    " | Indeed",
-    " - Indeed.com",
-    " – Indeed.com",
-    " - Indeed",
-    " – Indeed",
-  ] {
-    if let Some(stripped) = cleaned.strip_suffix(suffix) {
-      cleaned = stripped.trim().to_string();
-      break;
-    }
+fn company_from_cmp_url(url: &str) -> Option<String> {
+  let marker = "/cmp/";
+  let lower = url.to_lowercase();
+  let start = lower.find(marker)? + marker.len();
+  let rest = &url[start..];
+  let end = rest.find(['/', '?', '#']).unwrap_or(rest.len());
+  let raw = rest[..end].trim();
+  if raw.is_empty() {
+    return None;
   }
-
-  let contract = detect_contract(&cleaned);
-  let parts: Vec<&str> = cleaned
-    .split(" - ")
-    .map(str::trim)
-    .filter(|part| !part.is_empty())
-    .collect();
-
-  if parts.len() >= 2 {
-    let company = parts[parts.len() - 1].to_string();
-    let title = parts[..parts.len() - 1].join(" - ");
-    return (title, company, contract);
+  let name = raw.replace('+', " ").replace("%20", " ").replace('-', " ");
+  let trimmed = name.trim();
+  if trimmed.is_empty() || is_location_label(trimmed) {
+    None
+  } else {
+    Some(trimmed.to_string())
   }
-
-  if let Some((title, company)) = cleaned.split_once(" chez ") {
-    return (
-      title.trim().to_string(),
-      company.trim().to_string(),
-      contract,
-    );
-  }
-
-  (cleaned, String::new(), contract)
-}
-
-fn detect_contract(text: &str) -> String {
-  let lower = text.to_lowercase();
-  for label in ["CDI", "CDD", "Stage", "Alternance", "Freelance"] {
-    if lower.contains(&label.to_lowercase()) {
-      return label.to_string();
-    }
-  }
-  String::new()
 }
