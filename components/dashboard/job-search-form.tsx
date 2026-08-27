@@ -51,19 +51,21 @@ export function JobSearchForm({
 
   return (
     <form
-      className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 sm:p-5"
+      className="rounded-lg border border-border bg-card px-3 py-2.5"
       onSubmit={handleSubmit}
       aria-labelledby="recherche-entreprises-title"
     >
-      <h2
-        id="recherche-entreprises-title"
-        className="text-base font-semibold text-foreground"
-      >
-        Recherche entreprises
-      </h2>
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="job-source">Source</Label>
+      <div className="flex flex-wrap items-end gap-2">
+        <h2
+          id="recherche-entreprises-title"
+          className="mr-1 self-center text-sm font-semibold text-foreground"
+        >
+          Recherche
+        </h2>
+        <div className="flex min-w-40 flex-1 flex-col gap-1 sm:max-w-48">
+          <Label htmlFor="job-source" className="text-xs">
+            Source
+          </Label>
           <Select
             value={source}
             disabled={isLoading}
@@ -73,7 +75,12 @@ export function JobSearchForm({
               }
             }}
           >
-            <SelectTrigger id="job-source" aria-label="Source d'offres">
+            <SelectTrigger
+              id="job-source"
+              size="sm"
+              aria-label="Source d'offres"
+              className="w-full"
+            >
               <SelectValue>{JOB_BOARD_SOURCE_LABELS[source]}</SelectValue>
             </SelectTrigger>
             <SelectContent align="start">
@@ -85,41 +92,50 @@ export function JobSearchForm({
             </SelectContent>
           </Select>
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="job-location">Ville</Label>
+        <div className="flex min-w-28 flex-1 flex-col gap-1 sm:max-w-36">
+          <Label htmlFor="job-location" className="text-xs">
+            Ville
+          </Label>
           <Input
             id="job-location"
             value={location}
             placeholder="ex. Paris"
             disabled={isLoading}
+            className="h-7"
             onChange={(event) => {
               setLocation(event.target.value);
             }}
           />
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="job-keywords">Domaine / type de poste</Label>
+        <div className="flex min-w-40 flex-[2] flex-col gap-1">
+          <Label htmlFor="job-keywords" className="text-xs">
+            Domaine / poste
+          </Label>
           <Input
             id="job-keywords"
             value={keywords}
             required
             placeholder="ex. développeur web"
             disabled={isLoading}
+            className="h-7"
             onChange={(event) => {
               setKeywords(event.target.value);
             }}
           />
         </div>
-      </div>
-      <div className="flex flex-wrap items-center gap-3">
         <Button
           type="submit"
+          size="sm"
+          className="shrink-0"
           disabled={isLoading || keywords.trim().length === 0}
         >
           {isLoading ? "Recherche…" : "Valider"}
         </Button>
         {statusText ? (
-          <p className="text-sm text-muted-foreground" role="status">
+          <p
+            className="basis-full text-xs text-muted-foreground sm:basis-auto sm:self-center"
+            role="status"
+          >
             {statusText}
           </p>
         ) : null}

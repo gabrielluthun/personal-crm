@@ -32,6 +32,11 @@ export {
   type JobBoardSource,
 } from "@/lib/domain/job-board-source";
 
+export {
+  boardUrlForEntreprise,
+  resolveEntrepriseSource,
+} from "@/lib/domain/entreprise-source";
+
 export type {
   JobContractType,
   JobOffer,
