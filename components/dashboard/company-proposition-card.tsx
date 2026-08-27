@@ -5,6 +5,7 @@ import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { JobBoardSourceBadge } from "@/components/dashboard/job-board-source-badge";
+import { JobBoardSourceMark } from "@/components/dashboard/job-board-source-mark";
 import { SelectionCheckbox } from "@/components/data-table/selection-checkbox";
 import { Button } from "@/components/ui/button";
 import type { CompanyProposition } from "@/lib/dashboard/company-propositions";
@@ -65,14 +66,13 @@ export function CompanyPropositionCard({
             <ResultLink
               href={proposition.companyBoardUrl}
               label={boardLabel}
-              icon={
-                proposition.source === "wttj" ? <WttjMark /> : undefined
-              }
+              icon={<JobBoardSourceMark source={proposition.source} />}
               missingLabel={`${boardShort} non détecté`}
             />
             <ResultLink
               href={proposition.offerUrl}
               label={`Offre ${boardShort}`}
+              icon={<JobBoardSourceMark source={proposition.source} />}
             />
           </div>
 
@@ -92,17 +92,6 @@ export function CompanyPropositionCard({
         </div>
       </div>
     </article>
-  );
-}
-
-function WttjMark() {
-  return (
-    <span
-      className="inline-flex size-3.5 items-center justify-center rounded-[2px] bg-[#FFCD00] text-[9px] font-black text-black"
-      aria-hidden
-    >
-      W
-    </span>
   );
 }
 
