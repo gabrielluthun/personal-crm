@@ -4,6 +4,7 @@ import type {
   EntrepriseId,
   EntrepriseUpdateInput,
 } from "@/lib/domain/entreprise";
+import { writeJobBoardMetaToRaw } from "@/lib/domain/job-board-source-storage";
 import {
   notFoundError,
   repositoryError,
@@ -82,6 +83,7 @@ export class SupabaseEntrepriseRepository implements EntreprisePort {
 
   async create(input: EntrepriseCreateInput) {
     const timestamps = createTimestamps();
+    const source = input.source ?? null;
     const { data, error } = await this.client
       .from("entreprises")
       .insert(
@@ -93,7 +95,8 @@ export class SupabaseEntrepriseRepository implements EntreprisePort {
           location: input.location ?? null,
           targetOfferUrl: input.targetOfferUrl ?? null,
           notes: input.notes ?? null,
-          rawData: input.rawData ?? null,
+          source,
+          rawData: writeJobBoardMetaToRaw(input.rawData ?? null, { source }),
           scrapedAt: input.scrapedAt ?? null,
           ...timestamps,
         }),
@@ -111,6 +114,10 @@ export class SupabaseEntrepriseRepository implements EntreprisePort {
     if (!current.ok) {
       return current;
     }
+    const source =
+      input.source === undefined ? current.value.source : input.source;
+    const rawDataBase =
+      input.rawData === undefined ? current.value.rawData : input.rawData;
     const updated: Entreprise = {
       ...current.value,
       name: input.name?.trim() ?? current.value.name,
@@ -131,8 +138,8 @@ export class SupabaseEntrepriseRepository implements EntreprisePort {
           ? current.value.targetOfferUrl
           : input.targetOfferUrl,
       notes: input.notes === undefined ? current.value.notes : input.notes,
-      rawData:
-        input.rawData === undefined ? current.value.rawData : input.rawData,
+      source,
+      rawData: writeJobBoardMetaToRaw(rawDataBase, { source }),
       scrapedAt:
         input.scrapedAt === undefined
           ? current.value.scrapedAt
