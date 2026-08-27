@@ -1,6 +1,7 @@
 mod bright_data;
 mod error;
 mod job_search;
+mod job_search_indeed;
 mod job_search_map;
 mod job_search_names;
 mod models;
