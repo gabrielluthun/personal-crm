@@ -13,7 +13,8 @@ pub struct JobHit {
   pub company_slug: String,
   pub location: String,
   pub contract_type: String,
-  pub wttj_url: String,
+  pub source: String,
+  pub offer_url: String,
   pub description_snippet: Option<String>,
 }
 
@@ -30,7 +31,8 @@ impl JobHit {
       company_slug: self.company_slug,
       location: self.location,
       contract_type: self.contract_type,
-      wttj_url: self.wttj_url,
+      source: self.source,
+      offer_url: self.offer_url,
       company_website_url,
       company_linkedin_url,
       published_at: None,
@@ -39,7 +41,7 @@ impl JobHit {
   }
 }
 
-pub fn map_job_hit(
+pub fn map_wttj_hit(
   row: &OrganicResult,
   fallback_location: &str,
   wanted_contract: Option<&str>,
@@ -50,7 +52,6 @@ pub fn map_job_hit(
 
   let slug = company_slug_from_wttj(&row.link)?;
   let (title, location, contract) = parse_wttj_title(&row.title);
-  // URL slug is the only reliable company identity.
   let company_name = company_name_from_slug(&slug);
 
   if let Some(wanted) = wanted_contract {
@@ -74,7 +75,8 @@ pub fn map_job_hit(
     } else {
       contract
     },
-    wttj_url: row.link.clone(),
+    source: "wttj".into(),
+    offer_url: row.link.clone(),
     description_snippet: row.description.clone(),
   })
 }
@@ -107,6 +109,7 @@ pub fn pick_website_url(rows: &[OrganicResult]) -> Option<String> {
     let link = row.link.to_lowercase();
     if link.contains("linkedin.com")
       || link.contains("welcometothejungle.com")
+      || link.contains("indeed.")
       || link.contains("facebook.com")
       || link.contains("twitter.com")
       || link.contains("x.com")
@@ -116,6 +119,31 @@ pub fn pick_website_url(rows: &[OrganicResult]) -> Option<String> {
     }
     Some(row.link.clone())
   })
+}
+
+pub(crate) fn short_hash(input: &str) -> String {
+  let mut hash: u32 = 2166136261;
+  for byte in input.as_bytes() {
+    hash ^= u32::from(*byte);
+    hash = hash.wrapping_mul(16777619);
+  }
+  format!("{hash:x}")
+}
+
+pub(crate) fn slugify_company(name: &str) -> String {
+  let lower = name.to_lowercase();
+  let mut out = String::new();
+  let mut prev_dash = false;
+  for ch in lower.chars() {
+    if ch.is_ascii_alphanumeric() {
+      out.push(ch);
+      prev_dash = false;
+    } else if !prev_dash && !out.is_empty() {
+      out.push('-');
+      prev_dash = true;
+    }
+  }
+  out.trim_matches('-').to_string()
 }
 
 fn normalize_linkedin_company(url: &str) -> String {
@@ -133,7 +161,6 @@ fn normalize_linkedin_company(url: &str) -> String {
   }
 }
 
-/// Job title / location / contract only — never company (see URL slug).
 fn parse_wttj_title(raw: &str) -> (String, String, String) {
   let parts: Vec<&str> = raw
     .split(" - ")
@@ -166,13 +193,4 @@ fn parse_wttj_title(raw: &str) -> (String, String, String) {
   }
 
   (title, location, contract)
-}
-
-fn short_hash(input: &str) -> String {
-  let mut hash: u32 = 2166136261;
-  for byte in input.as_bytes() {
-    hash ^= u32::from(*byte);
-    hash = hash.wrapping_mul(16777619);
-  }
-  format!("{hash:x}")
 }
