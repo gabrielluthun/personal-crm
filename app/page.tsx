@@ -4,8 +4,10 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { CompanyPropositionList } from "@/components/dashboard/company-proposition-list";
+import { FollowUpReminder } from "@/components/dashboard/follow-up-reminder";
 import { JobSearchForm } from "@/components/dashboard/job-search-form";
 import { PageHeader } from "@/components/layout/page-header";
+import { useContacts } from "@/hooks/use-contacts";
 import { useEntreprises } from "@/hooks/use-entreprises";
 import { useJobSearch } from "@/hooks/use-job-search";
 import { useRowSelection } from "@/hooks/use-row-selection";
@@ -15,12 +17,15 @@ import {
   formatRecruitmentContext,
 } from "@/lib/dashboard/company-propositions";
 import type { JobOfferId, JobSearchQuery } from "@/lib/domain/job-offer";
+import { countDueForFollowUp } from "@/lib/services/contact-follow-up";
 
 export default function DashboardPage() {
   const jobSearch = useJobSearch();
   const { items: entreprises, create } = useEntreprises();
+  const { items: contacts } = useContacts();
   const selection = useRowSelection<JobOfferId>();
   const [isImporting, setIsImporting] = useState(false);
+  const followUpCount = countDueForFollowUp(contacts);
 
   const { propositions, stats } = buildCompanyPropositions(
     jobSearch.offers,
@@ -91,6 +96,7 @@ export default function DashboardPage() {
         description="Découvrez des entreprises sur Welcome to the Jungle qui recrutent dans un domaine donné — sans les ajouter automatiquement."
       />
       <div className="flex min-h-0 flex-1 flex-col gap-6 px-4 py-4 sm:px-6 md:px-8">
+        <FollowUpReminder count={followUpCount} />
         <JobSearchForm
           isLoading={jobSearch.isLoading}
           statusText={statusText}
